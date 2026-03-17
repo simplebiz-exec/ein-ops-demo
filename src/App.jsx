@@ -38,6 +38,7 @@ const queueStats = [
   { label: "Waiting Review", value: 18, icon: UserCheck },
   { label: "Exceptions", value: 7, icon: AlertTriangle },
   { label: "Completed Today", value: 126, icon: CheckCircle2 },
+  { label: "Auto Submitted", value: 88, icon: CheckCircle2 },
   { label: "Timed Out", value: 2, icon: PauseCircle },
 ];
 
@@ -568,6 +569,9 @@ export default function App() {
   const [mode, setMode] = useState("reviewer");
   const [showSettings, setShowSettings] = useState(true);
   const [presentationMode, setPresentationMode] = useState(true);
+  const [systemMode, setSystemMode] = useState("review");
+
+  const AUTO_CONFIDENCE_THRESHOLD = 97;
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -595,7 +599,23 @@ export default function App() {
     filtered.find((item) => item.id === selectedId) || filtered[0] || cases[0];
   const meta = statusMeta(selected.status);
 
-  const reviewQueue = filtered.filter((c) => c.status === "waiting_review");
+  const isAutoEligible =
+    selected.mismatches.length === 0 &&
+    selected.confidence >= AUTO_CONFIDENCE_THRESHOLD;
+
+  const autoDecision =
+    systemMode === "auto" && isAutoEligible
+      ? "AUTO_APPROVED"
+      : selected.mismatches.length > 0
+      ? "EXCEPTION"
+      : "REVIEW_REQUIRED";
+
+  const reviewQueue = filtered.filter((c) =>
+    systemMode === "auto"
+      ? c.status === "waiting_review" && (c.mismatches.length > 0 || c.confidence < AUTO_CONFIDENCE_THRESHOLD)
+      : c.status === "waiting_review"
+  );
+
   const nextCase = reviewQueue[0];
 
   return (
@@ -668,9 +688,17 @@ export default function App() {
                 <Presentation size={16} style={{ marginRight: 8 }} />
                 {presentationMode ? "Ops View" : "Presentation View"}
               </button>
-              <button style={buttonStyle(false)}>
-                <Settings2 size={16} style={{ marginRight: 8 }} />
-                Workflow Settings
+              <button
+                onClick={() => setSystemMode("review")}
+                style={buttonStyle(systemMode === "review")}
+              >
+                🔵 Review Mode
+              </button>
+              <button
+                onClick={() => setSystemMode("auto")}
+                style={buttonStyle(systemMode === "auto")}
+              >
+                🟢 Auto Mode
               </button>
               <button style={buttonStyle(true)}>
                 <FastForward size={16} style={{ marginRight: 8 }} />
@@ -708,11 +736,11 @@ export default function App() {
                 Final demo build for UI review, workflow validation, and developer handoff
               </div>
               <h1 style={{ fontSize: 40, margin: "0 0 8px", lineHeight: 1.06 }}>
-                Version 5 · Demo + Developer Handoff Workspace
+                Version 6 · Auto Mode + Review Mode
               </h1>
               <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
-                Final polished demo with presentation-grade layout, clearer fake data labeling,
-                embedded architecture summary, and a stronger handoff story for engineering.
+                Final polished demo with both operating modes: Review Mode requires human approval,
+                while Auto Mode auto-submits clean federal EIN cases that pass match checks and confidence thresholds.
               </p>
             </div>
 
@@ -724,12 +752,20 @@ export default function App() {
                 background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
               }}
             >
-              <SectionLabel>Handoff Summary</SectionLabel>
+              <SectionLabel>Mode Summary</SectionLabel>
               <div style={{ display: "grid", gap: 10, marginTop: 14, fontSize: 14, color: "#475569" }}>
-                <div>• Single-screen review is the default operator pattern.</div>
-                <div>• Source vs IRS comparison supports exception resolution.</div>
-                <div>• Reviewer and specialist modes should separate permissions.</div>
-                <div>• Queue controls and workflow settings should become configurable admin options.</div>
+                <div>
+                  <strong>Review Mode:</strong> all review-stage cases pause for human approval.
+                </div>
+                <div>
+                  <strong>Auto Mode:</strong> clean matched cases auto-submit; only non-clean cases need review.
+                </div>
+                <div>
+                  <strong>Exception flow:</strong> unchanged in both modes.
+                </div>
+                <div>
+                  <strong>Threshold:</strong> confidence must be at least {AUTO_CONFIDENCE_THRESHOLD}% for auto-submission.
+                </div>
               </div>
             </div>
           </div>
@@ -738,7 +774,7 @@ export default function App() {
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+            gridTemplateColumns: "repeat(7, minmax(0, 1fr))",
             gap: 16,
             marginBottom: 22,
           }}
@@ -887,7 +923,9 @@ export default function App() {
                 <div style={softPanelStyle()}>
                   <div style={{ fontSize: 30, fontWeight: 800 }}>{reviewQueue.length}</div>
                   <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
-                    Cases waiting for human approval
+                    {systemMode === "auto"
+                      ? "Cases that still need human review"
+                      : "Cases waiting for human approval"}
                   </div>
                 </div>
                 <div style={softPanelStyle()}>
@@ -950,6 +988,10 @@ export default function App() {
                 {filtered.map((item) => {
                   const itemMeta = statusMeta(item.status);
                   const isSelected = selected.id === item.id;
+                  const itemAutoEligible =
+                    item.mismatches.length === 0 &&
+                    item.confidence >= AUTO_CONFIDENCE_THRESHOLD;
+
                   return (
                     <button
                       key={item.id}
@@ -999,6 +1041,9 @@ export default function App() {
                           {item.priority === "high" ? "High Priority" : "Normal"}
                         </div>
                         <div style={badgeStyle("#fff", "#334155")}>{item.stage}</div>
+                        {systemMode === "auto" && itemAutoEligible && (
+                          <div style={badgeStyle("#dcfce7", "#166534")}>Auto Eligible</div>
+                        )}
                       </div>
 
                       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
@@ -1040,6 +1085,12 @@ export default function App() {
                     <div style={badgeStyle(meta.bg, meta.color)}>{meta.label}</div>
                     <div style={badgeStyle("#fff", "#334155")}>{selected.id}</div>
                     <div style={badgeStyle("#eef2ff", "#4338ca")}>Demo Data</div>
+                    {systemMode === "auto" && isAutoEligible && (
+                      <div style={badgeStyle("#dcfce7", "#166534")}>🟢 Auto Approved</div>
+                    )}
+                    {systemMode === "auto" && !isAutoEligible && (
+                      <div style={badgeStyle("#fee2e2", "#991b1b")}>⚠️ Needs Review</div>
+                    )}
                   </div>
                   <div
                     style={{
@@ -1064,7 +1115,9 @@ export default function App() {
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", gap: 10 }}>
-                  <button style={buttonStyle(true)}>Approve Submit</button>
+                  <button style={buttonStyle(true)}>
+                    {systemMode === "auto" && isAutoEligible ? "Auto Submit Enabled" : "Approve Submit"}
+                  </button>
                   <button style={buttonStyle(false)}>Send to Exception</button>
                   <button style={buttonStyle(false)}>Retry Bot</button>
                   <button style={buttonStyle(false)}>Hold Case</button>
@@ -1098,10 +1151,14 @@ export default function App() {
                   </div>
                 </div>
                 <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
-                  <SectionLabel>Recommended Action</SectionLabel>
-                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{selected.agentAction}</div>
+                  <SectionLabel>System Mode</SectionLabel>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>
+                    {systemMode === "auto" ? "Auto Mode" : "Review Mode"}
+                  </div>
                   <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
-                    Based on current validation and bot status.
+                    {systemMode === "auto"
+                      ? "Clean cases submit without human approval."
+                      : "Human approval is required before submit."}
                   </div>
                 </div>
               </div>
@@ -1320,50 +1377,63 @@ export default function App() {
 
                   <div
                     style={{
-                      border: `1px solid ${selected.mismatches.length ? "#fecaca" : "#bbf7d0"}`,
-                      background: selected.mismatches.length ? "#fef2f2" : "#f0fdf4",
+                      border: `1px solid ${
+                        autoDecision === "AUTO_APPROVED" ? "#bbf7d0" : selected.mismatches.length ? "#fecaca" : "#e2e8f0"
+                      }`,
+                      background:
+                        autoDecision === "AUTO_APPROVED"
+                          ? "#f0fdf4"
+                          : selected.mismatches.length
+                          ? "#fef2f2"
+                          : "#f8fafc",
                       borderRadius: 18,
                       padding: 16,
                     }}
                   >
-                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
-                      {selected.mismatches.length ? (
-                        <AlertTriangle size={18} color="#dc2626" style={{ marginTop: 2 }} />
-                      ) : (
-                        <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2 }} />
-                      )}
-                      <div>
-                        <div
-                          style={{
-                            fontWeight: 800,
-                            color: selected.mismatches.length ? "#991b1b" : "#166534",
-                          }}
-                        >
-                          {selected.mismatches.length
-                            ? "Mismatch attention required"
-                            : "Guard rails currently passed"}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 6,
-                            fontSize: 14,
-                            color: selected.mismatches.length ? "#991b1b" : "#166534",
-                          }}
-                        >
-                          {selected.mismatches.length
-                            ? "Source and IRS values differ. Specialist review is recommended before submit."
-                            : "No source-to-review mismatches detected for this case."}
-                        </div>
-                      </div>
+                    <div style={{ fontWeight: 800, fontSize: 15 }}>
+                      {autoDecision === "AUTO_APPROVED"
+                        ? "Auto Mode: This case will be submitted automatically"
+                        : autoDecision === "EXCEPTION"
+                        ? "Manual review required: exception or mismatch detected"
+                        : "Manual review required"}
+                    </div>
+                    <div style={{ marginTop: 6, fontSize: 14, color: "#475569" }}>
+                      {autoDecision === "AUTO_APPROVED"
+                        ? "This case passed match checks and confidence threshold with no mismatches."
+                        : systemMode === "review"
+                        ? "Review Mode requires human approval before submission."
+                        : "This case did not qualify for auto submission and still needs human action."}
                     </div>
                   </div>
 
                   <div style={{ ...softPanelStyle(), marginTop: 16 }}>
                     <SectionLabel>Fast Actions</SectionLabel>
                     <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-                      <button style={buttonStyle(true)}>Approve and Resume Bot Submission</button>
+                      {systemMode === "review" && (
+                        <>
+                          <button style={buttonStyle(true)}>
+                            Approve and Resume Bot Submission
+                          </button>
+                          <button style={buttonStyle(false)}>
+                            Reject to Exception Queue
+                          </button>
+                        </>
+                      )}
+
+                      {systemMode === "auto" && isAutoEligible && (
+                        <button style={buttonStyle(true)}>
+                          Auto-approved (no action needed)
+                        </button>
+                      )}
+
+                      {systemMode === "auto" && !isAutoEligible && (
+                        <>
+                          <button style={buttonStyle(true)}>Review Required</button>
+                          <button style={buttonStyle(false)}>Send to Exception</button>
+                        </>
+                      )}
+
                       <button style={buttonStyle(false)}>Approve and Open Next Case</button>
-                      <button style={buttonStyle(false)}>Reject to Exception Queue</button>
                       <button style={buttonStyle(false)}>Request Source Data Edit</button>
                     </div>
                   </div>
@@ -1376,7 +1446,7 @@ export default function App() {
                         "Responsible party matches validated intake",
                         "Address and state fields look correct",
                         "Business activity is specific enough",
-                        "Reason for applying is correct",
+                        `Confidence is at least ${AUTO_CONFIDENCE_THRESHOLD}% for auto mode`,
                       ].map((item) => (
                         <div key={item} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                           <CheckCircle2 size={16} color="#16a34a" />
@@ -1391,7 +1461,8 @@ export default function App() {
                     <div style={{ marginTop: 12, display: "grid", gap: 10, fontSize: 14, color: "#475569" }}>
                       <div>Reviewer Mode: clean approvals and quick triage</div>
                       <div>Specialist Mode: mismatches, edits, escalations</div>
-                      <div>Queue filter controls what work is shown on left</div>
+                      <div>Review Mode: all review-stage cases pause for approval</div>
+                      <div>Auto Mode: clean matched cases submit automatically</div>
                     </div>
                   </div>
                 </div>
@@ -1635,8 +1706,7 @@ export default function App() {
                     routed into a specialist workflow with explicit actions.
                   </div>
                   <div>
-                    Bot control actions are surfaced in the same console so operations teams can
-                    approve, retry, pause, and audit without switching tools.
+                    Auto Mode only changes clean-case approval flow. Exception handling remains unchanged.
                   </div>
                 </div>
               </div>
@@ -1647,7 +1717,7 @@ export default function App() {
                   <div>1. Preserve the single-screen review pattern as the default workflow.</div>
                   <div>2. Keep source comparison highly visible for exception and mismatch cases.</div>
                   <div>3. Separate reviewer and specialist permission sets at the action layer.</div>
-                  <div>4. Keep queue filters, quick actions, and workflow settings configurable.</div>
+                  <div>4. Auto Mode should use deterministic validation and match checks, not AI guesses.</div>
                 </div>
               </div>
             </div>
