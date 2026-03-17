@@ -19,6 +19,11 @@ import {
   FastForward,
   SlidersHorizontal,
   SplitSquareHorizontal,
+  Settings2,
+  Bell,
+  PanelLeftClose,
+  Activity,
+  RefreshCw,
 } from "lucide-react";
 
 const queueStats = [
@@ -287,17 +292,17 @@ const artifacts = [
 function statusMeta(status) {
   switch (status) {
     case "waiting_review":
-      return { label: "Waiting Review", color: "#b45309", bg: "#fef3c7" };
+      return { label: "Waiting Review", color: "#a16207", bg: "#fef3c7", dot: "#d97706" };
     case "in_progress":
-      return { label: "In Progress", color: "#1d4ed8", bg: "#dbeafe" };
+      return { label: "In Progress", color: "#1d4ed8", bg: "#dbeafe", dot: "#2563eb" };
     case "exception":
-      return { label: "Exception", color: "#b91c1c", bg: "#fee2e2" };
+      return { label: "Exception", color: "#b91c1c", bg: "#fee2e2", dot: "#dc2626" };
     case "completed":
-      return { label: "Completed", color: "#047857", bg: "#d1fae5" };
+      return { label: "Completed", color: "#047857", bg: "#d1fae5", dot: "#10b981" };
     case "ready":
-      return { label: "Ready", color: "#334155", bg: "#e2e8f0" };
+      return { label: "Ready", color: "#334155", bg: "#e2e8f0", dot: "#64748b" };
     default:
-      return { label: status, color: "#475569", bg: "#f1f5f9" };
+      return { label: status, color: "#475569", bg: "#f1f5f9", dot: "#94a3b8" };
   }
 }
 
@@ -319,10 +324,10 @@ function badgeStyle(bg, color) {
 
 function cardStyle() {
   return {
-    background: "#fff",
+    background: "#ffffff",
     border: "1px solid #e2e8f0",
-    borderRadius: 20,
-    boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+    borderRadius: 22,
+    boxShadow: "0 10px 24px rgba(15,23,42,0.04)",
   };
 }
 
@@ -332,7 +337,9 @@ function buttonStyle(primary = false) {
     padding: "0 16px",
     borderRadius: 14,
     border: primary ? "none" : "1px solid #cbd5e1",
-    background: primary ? "#0f172a" : "#fff",
+    background: primary
+      ? "linear-gradient(135deg, #0f172a 0%, #1e293b 100%)"
+      : "#fff",
     color: primary ? "#fff" : "#0f172a",
     fontWeight: 700,
     cursor: "pointer",
@@ -352,34 +359,20 @@ function StatCard({ stat }) {
   const Icon = stat.icon;
   return (
     <div style={{ ...cardStyle(), padding: 20 }}>
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "flex-start",
-        }}
-      >
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
         <div>
-          <div style={{ fontSize: 14, color: "#64748b" }}>{stat.label}</div>
-          <div
-            style={{
-              marginTop: 10,
-              fontSize: 32,
-              fontWeight: 800,
-              color: "#0f172a",
-            }}
-          >
-            {stat.value}
-          </div>
+          <div style={{ fontSize: 13, color: "#64748b", fontWeight: 600 }}>{stat.label}</div>
+          <div style={{ marginTop: 10, fontSize: 34, fontWeight: 800, color: "#0f172a" }}>{stat.value}</div>
         </div>
         <div
           style={{
-            background: "#f1f5f9",
+            background: "linear-gradient(180deg, #f8fafc 0%, #e2e8f0 100%)",
             borderRadius: 16,
             padding: 12,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
+            border: "1px solid #e2e8f0",
           }}
         >
           <Icon size={20} color="#334155" />
@@ -470,12 +463,36 @@ function CompareRow({ label, source, irs }) {
   );
 }
 
+function NavButton({ icon: Icon, label }) {
+  return (
+    <button
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 10,
+        width: "100%",
+        padding: "12px 14px",
+        borderRadius: 14,
+        border: "1px solid #e2e8f0",
+        background: "#fff",
+        color: "#0f172a",
+        cursor: "pointer",
+        fontWeight: 700,
+      }}
+    >
+      <Icon size={16} />
+      {label}
+    </button>
+  );
+}
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState("EIN-240318-001");
   const [tab, setTab] = useState("review");
   const [queueFilter, setQueueFilter] = useState("all");
   const [mode, setMode] = useState("reviewer");
+  const [showSettings, setShowSettings] = useState(true);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -510,68 +527,131 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background: "#f8fafc",
+        background:
+          "radial-gradient(circle at top left, #eef2ff 0%, #f8fafc 35%, #f8fafc 100%)",
         color: "#0f172a",
         fontFamily:
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1640, margin: "0 auto", padding: 28 }}>
+      <div style={{ maxWidth: 1680, margin: "0 auto", padding: 24 }}>
+        <div
+          style={{
+            ...cardStyle(),
+            padding: 18,
+            marginBottom: 20,
+            background: "rgba(255,255,255,0.85)",
+            backdropFilter: "blur(12px)",
+          }}
+        >
+          <div style={{ display: "flex", justifyContent: "space-between", gap: 18, alignItems: "center" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+              <div
+                style={{
+                  width: 44,
+                  height: 44,
+                  borderRadius: 14,
+                  background: "linear-gradient(135deg, #0f172a 0%, #334155 100%)",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  color: "#fff",
+                }}
+              >
+                <ShieldCheck size={20} />
+              </div>
+              <div>
+                <div style={{ fontSize: 12, fontWeight: 800, color: "#64748b", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                  SimpleBiz EIN Automation
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>
+                  Live Agent Ops Console
+                </div>
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
+                <Bell size={16} />
+              </button>
+              <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
+                <RefreshCw size={16} />
+              </button>
+              <button style={buttonStyle(false)}>
+                <Settings2 size={16} style={{ marginRight: 8 }} />
+                Workflow Settings
+              </button>
+              <button style={buttonStyle(true)}>
+                <FastForward size={16} style={{ marginRight: 8 }} />
+                Open Next Review
+              </button>
+            </div>
+          </div>
+        </div>
+
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ marginBottom: 28 }}
+          style={{ marginBottom: 24 }}
         >
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 8,
-              color: "#64748b",
-              fontSize: 14,
-            }}
-          >
-            <ShieldCheck size={16} />
-            EIN Operations Demo · Live Agent Review Console
-          </div>
           <div
             style={{
               display: "flex",
               justifyContent: "space-between",
               gap: 20,
               alignItems: "flex-start",
-              marginTop: 12,
             }}
           >
             <div>
-              <h1
+              <div
                 style={{
-                  fontSize: 40,
-                  margin: "0 0 8px",
-                  lineHeight: 1.1,
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 8,
+                  color: "#64748b",
+                  fontSize: 14,
+                  marginBottom: 8,
                 }}
               >
-                EIN Review + Exception Handling Workspace
+                <Activity size={16} />
+                Demo workspace for reviewer flow, exception handling, and developer handoff
+              </div>
+              <h1 style={{ fontSize: 40, margin: "0 0 8px", lineHeight: 1.06 }}>
+                Version 4 · Handoff-Ready Operator Dashboard
               </h1>
               <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
-                Demo UI for bot coordination, live review, exception routing, and
-                completion tracking before handing the project to developers.
+                Refined presentation pass with stronger top navigation, better queue visibility,
+                polished case cards, and a lightweight settings panel for stakeholder review.
               </p>
             </div>
 
-            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
-              <button style={buttonStyle(false)}>
-                <SlidersHorizontal size={16} style={{ marginRight: 8 }} />
-                Queue Rules
-              </button>
-              <button style={buttonStyle(false)}>
-                <SplitSquareHorizontal size={16} style={{ marginRight: 8 }} />
-                Open Source Compare
-              </button>
-              <button style={buttonStyle(true)}>
-                <FastForward size={16} style={{ marginRight: 8 }} />
-                Next Review Case
-              </button>
+            <div
+              style={{
+                ...cardStyle(),
+                padding: 16,
+                minWidth: 320,
+                background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+              }}
+            >
+              <SectionLabel>Shift Snapshot</SectionLabel>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+                <div>
+                  <div style={{ fontSize: 28, fontWeight: 800 }}>34s</div>
+                  <div style={{ fontSize: 13, color: "#64748b" }}>Avg clean review</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 28, fontWeight: 800 }}>97.6%</div>
+                  <div style={{ fontSize: 13, color: "#64748b" }}>Bot completion rate</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 28, fontWeight: 800 }}>3</div>
+                  <div style={{ fontSize: 13, color: "#64748b" }}>Escalations / hr</div>
+                </div>
+                <div>
+                  <div style={{ fontSize: 28, fontWeight: 800 }}>9m</div>
+                  <div style={{ fontSize: 13, color: "#64748b" }}>Session headroom</div>
+                </div>
+              </div>
             </div>
           </div>
         </motion.div>
@@ -624,24 +704,16 @@ export default function App() {
           </div>
 
           <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-            <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>
-              Mode
-            </span>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>Mode</span>
             <button
               onClick={() => setMode("reviewer")}
-              style={{
-                ...buttonStyle(mode === "reviewer"),
-                height: 38,
-              }}
+              style={{ ...buttonStyle(mode === "reviewer"), height: 38 }}
             >
               Reviewer
             </button>
             <button
               onClick={() => setMode("specialist")}
-              style={{
-                ...buttonStyle(mode === "specialist"),
-                height: 38,
-              }}
+              style={{ ...buttonStyle(mode === "specialist"), height: 38 }}
             >
               Specialist
             </button>
@@ -650,262 +722,231 @@ export default function App() {
 
         <div
           style={{
-            ...cardStyle(),
-            padding: 18,
-            marginBottom: 24,
             display: "grid",
-            gridTemplateColumns: "1.2fr 1fr 1fr 1fr",
-            gap: 16,
-          }}
-        >
-          <div style={softPanelStyle()}>
-            <SectionLabel>Fast Review Queue</SectionLabel>
-            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>
-              {reviewQueue.length}
-            </div>
-            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
-              Cases currently waiting for human approval.
-            </div>
-          </div>
-          <div style={softPanelStyle()}>
-            <SectionLabel>Next Recommended Case</SectionLabel>
-            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 800 }}>
-              {nextCase ? nextCase.company : "No review cases"}
-            </div>
-            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
-              {nextCase ? `${nextCase.id} · ${nextCase.age}` : "Queue is clear"}
-            </div>
-          </div>
-          <div style={softPanelStyle()}>
-            <SectionLabel>Reviewer SLA</SectionLabel>
-            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>
-              34s
-            </div>
-            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
-              Average clean-case review time.
-            </div>
-          </div>
-          <div style={softPanelStyle()}>
-            <SectionLabel>Escalations</SectionLabel>
-            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>3</div>
-            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
-              Cases routed to specialists this hour.
-            </div>
-          </div>
-        </div>
-
-        <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "390px 1fr",
+            gridTemplateColumns: showSettings ? "220px 390px 1fr" : "390px 1fr",
             gap: 24,
           }}
         >
-          <div style={{ ...cardStyle(), padding: 20 }}>
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginBottom: 14,
-              }}
-            >
-              <h2 style={{ margin: 0, fontSize: 22 }}>Agent Queue</h2>
-              <div style={badgeStyle("#fff", "#334155")}>
-                {filtered.length} visible
-              </div>
-            </div>
-
-            <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
-              <div style={{ position: "relative", flex: 1 }}>
-                <Search
-                  size={16}
-                  color="#94a3b8"
-                  style={{
-                    position: "absolute",
-                    left: 12,
-                    top: "50%",
-                    transform: "translateY(-50%)",
-                  }}
-                />
-                <input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search case, party, state..."
-                  style={{
-                    width: "100%",
-                    height: 42,
-                    borderRadius: 14,
-                    border: "1px solid #cbd5e1",
-                    padding: "0 14px 0 36px",
-                    outline: "none",
-                    fontSize: 14,
-                  }}
-                />
-              </div>
-              <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
-                <Filter size={16} />
-              </button>
-            </div>
-
-            <div
-              style={{
-                display: "grid",
-                gap: 12,
-                maxHeight: 1120,
-                overflow: "auto",
-                paddingRight: 4,
-              }}
-            >
-              {filtered.map((item) => {
-                const itemMeta = statusMeta(item.status);
-                const isSelected = selected.id === item.id;
-                return (
+          {showSettings && (
+            <div style={{ display: "grid", gap: 16, alignSelf: "start", position: "sticky", top: 24 }}>
+              <div style={{ ...cardStyle(), padding: 16 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 14 }}>
+                  <SectionLabel>Quick Nav</SectionLabel>
                   <button
-                    key={item.id}
-                    onClick={() => setSelectedId(item.id)}
-                    style={{
-                      textAlign: "left",
-                      width: "100%",
-                      borderRadius: 18,
-                      border: isSelected
-                        ? "1px solid #0f172a"
-                        : "1px solid #e2e8f0",
-                      background: "#fff",
-                      padding: 16,
-                      cursor: "pointer",
-                    }}
+                    onClick={() => setShowSettings(false)}
+                    style={{ ...buttonStyle(false), width: 34, height: 34, padding: 0 }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        gap: 12,
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: 14 }}>
-                          {item.company}
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 4,
-                            fontSize: 12,
-                            color: "#64748b",
-                          }}
-                        >
-                          {item.id} · {item.state} · {item.county}
-                        </div>
-                      </div>
-                      <ChevronRight size={16} color="#94a3b8" />
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        flexWrap: "wrap",
-                        marginTop: 12,
-                      }}
-                    >
-                      <div style={badgeStyle(itemMeta.bg, itemMeta.color)}>
-                        {itemMeta.label}
-                      </div>
-                      <div style={badgeStyle("#fff", "#334155")}>
-                        {item.priority === "high"
-                          ? "High Priority"
-                          : "Normal"}
-                      </div>
-                      <div style={badgeStyle("#fff", "#334155")}>
-                        {item.stage}
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "grid",
-                        gridTemplateColumns: "1fr 1fr",
-                        gap: 10,
-                        marginTop: 14,
-                      }}
-                    >
-                      <div>
-                        <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                          Responsible Party
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 4,
-                            fontSize: 13,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {item.responsibleParty}
-                        </div>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, color: "#94a3b8" }}>
-                          Bot Worker
-                        </div>
-                        <div
-                          style={{
-                            marginTop: 4,
-                            fontSize: 13,
-                            fontWeight: 700,
-                          }}
-                        >
-                          {item.botWorker}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                        marginTop: 14,
-                        fontSize: 12,
-                      }}
-                    >
-                      <div style={{ color: "#64748b" }}>Age: {item.age}</div>
-                      <div style={{ fontWeight: 700 }}>
-                        {item.issueCount} issues
-                      </div>
-                    </div>
+                    <PanelLeftClose size={14} />
                   </button>
-                );
-              })}
-            </div>
-          </div>
+                </div>
+                <div style={{ display: "grid", gap: 10 }}>
+                  <NavButton icon={FastForward} label="Next Review Case" />
+                  <NavButton icon={SplitSquareHorizontal} label="Source Compare" />
+                  <NavButton icon={SlidersHorizontal} label="Queue Rules" />
+                  <NavButton icon={FileText} label="Export Report" />
+                </div>
+              </div>
 
-          <div style={{ display: "grid", gap: 24 }}>
-            <div style={{ ...cardStyle(), padding: 24 }}>
+              <div style={{ ...cardStyle(), padding: 16 }}>
+                <SectionLabel>Agent Workflow Options</SectionLabel>
+                <div style={{ display: "grid", gap: 14, marginTop: 14, fontSize: 14, color: "#475569" }}>
+                  <label style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <span>Auto-open next clean case</span>
+                    <input type="checkbox" defaultChecked />
+                  </label>
+                  <label style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <span>Require approval note</span>
+                    <input type="checkbox" />
+                  </label>
+                  <label style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <span>Always show comparison tab</span>
+                    <input type="checkbox" defaultChecked />
+                  </label>
+                  <label style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                    <span>Escalate mismatches to specialist</span>
+                    <input type="checkbox" defaultChecked />
+                  </label>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {!showSettings && (
+            <button
+              onClick={() => setShowSettings(true)}
+              style={{
+                position: "fixed",
+                left: 18,
+                bottom: 18,
+                ...buttonStyle(true),
+                zIndex: 20,
+              }}
+            >
+              <Settings2 size={16} style={{ marginRight: 8 }} />
+              Open Settings
+            </button>
+          )}
+
+          <div style={{ display: "grid", gap: 16, alignSelf: "start" }}>
+            <div
+              style={{
+                ...cardStyle(),
+                padding: 18,
+                background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+              }}
+            >
+              <SectionLabel>Fast Review Queue</SectionLabel>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
+                <div style={softPanelStyle()}>
+                  <div style={{ fontSize: 30, fontWeight: 800 }}>{reviewQueue.length}</div>
+                  <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
+                    Cases waiting for human approval
+                  </div>
+                </div>
+                <div style={softPanelStyle()}>
+                  <div style={{ fontSize: 16, fontWeight: 800 }}>
+                    {nextCase ? nextCase.company : "No review cases"}
+                  </div>
+                  <div style={{ fontSize: 13, color: "#64748b", marginTop: 4 }}>
+                    {nextCase ? `${nextCase.id} · ${nextCase.age}` : "Queue is clear"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div style={{ ...cardStyle(), padding: 20 }}>
               <div
                 style={{
                   display: "flex",
                   justifyContent: "space-between",
-                  gap: 20,
-                  alignItems: "flex-start",
+                  alignItems: "center",
+                  marginBottom: 14,
                 }}
               >
-                <div>
-                  <div
+                <h2 style={{ margin: 0, fontSize: 22 }}>Agent Queue</h2>
+                <div style={badgeStyle("#fff", "#334155")}>{filtered.length} visible</div>
+              </div>
+
+              <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+                <div style={{ position: "relative", flex: 1 }}>
+                  <Search
+                    size={16}
+                    color="#94a3b8"
                     style={{
-                      display: "flex",
-                      alignItems: "center",
-                      gap: 10,
-                      flexWrap: "wrap",
+                      position: "absolute",
+                      left: 12,
+                      top: "50%",
+                      transform: "translateY(-50%)",
                     }}
-                  >
-                    <h2 style={{ margin: 0, fontSize: 30 }}>
-                      {selected.company}
-                    </h2>
-                    <div style={badgeStyle(meta.bg, meta.color)}>
-                      {meta.label}
-                    </div>
-                    <div style={badgeStyle("#fff", "#334155")}>
-                      {selected.id}
-                    </div>
+                  />
+                  <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search case, party, state..."
+                    style={{
+                      width: "100%",
+                      height: 42,
+                      borderRadius: 14,
+                      border: "1px solid #cbd5e1",
+                      padding: "0 14px 0 36px",
+                      outline: "none",
+                      fontSize: 14,
+                    }}
+                  />
+                </div>
+                <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
+                  <Filter size={16} />
+                </button>
+              </div>
+
+              <div style={{ display: "grid", gap: 12, maxHeight: 980, overflow: "auto", paddingRight: 4 }}>
+                {filtered.map((item) => {
+                  const itemMeta = statusMeta(item.status);
+                  const isSelected = selected.id === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setSelectedId(item.id)}
+                      style={{
+                        textAlign: "left",
+                        width: "100%",
+                        borderRadius: 20,
+                        border: isSelected ? "1px solid #0f172a" : "1px solid #e2e8f0",
+                        background: isSelected
+                          ? "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)"
+                          : "#fff",
+                        padding: 16,
+                        cursor: "pointer",
+                        boxShadow: isSelected ? "0 10px 18px rgba(15,23,42,0.06)" : "none",
+                      }}
+                    >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
+                        <div>
+                          <div style={{ fontWeight: 800, fontSize: 14 }}>{item.company}</div>
+                          <div style={{ marginTop: 4, fontSize: 12, color: "#64748b" }}>
+                            {item.id} · {item.state} · {item.county}
+                          </div>
+                        </div>
+                        <ChevronRight size={16} color="#94a3b8" />
+                      </div>
+
+                      <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 12 }}>
+                        <div style={badgeStyle(itemMeta.bg, itemMeta.color)}>
+                          <span
+                            style={{
+                              width: 6,
+                              height: 6,
+                              borderRadius: 999,
+                              background: itemMeta.dot,
+                              display: "inline-block",
+                            }}
+                          />
+                          {itemMeta.label}
+                        </div>
+                        <div style={badgeStyle(item.priority === "high" ? "#fee2e2" : "#fff", item.priority === "high" ? "#b91c1c" : "#334155")}>
+                          {item.priority === "high" ? "High Priority" : "Normal"}
+                        </div>
+                        <div style={badgeStyle("#fff", "#334155")}>{item.stage}</div>
+                      </div>
+
+                      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginTop: 14 }}>
+                        <div>
+                          <div style={{ fontSize: 12, color: "#94a3b8" }}>Responsible Party</div>
+                          <div style={{ marginTop: 4, fontSize: 13, fontWeight: 700 }}>
+                            {item.responsibleParty}
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 12, color: "#94a3b8" }}>Bot Worker</div>
+                          <div style={{ marginTop: 4, fontSize: 13, fontWeight: 700 }}>{item.botWorker}</div>
+                        </div>
+                      </div>
+
+                      <div style={{ display: "flex", justifyContent: "space-between", marginTop: 14, fontSize: 12 }}>
+                        <div style={{ color: "#64748b" }}>Age: {item.age}</div>
+                        <div style={{ fontWeight: 700 }}>{item.issueCount} issues</div>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: "grid", gap: 24 }}>
+            <div
+              style={{
+                ...cardStyle(),
+                padding: 24,
+                background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
+              }}
+            >
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "flex-start" }}>
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+                    <h2 style={{ margin: 0, fontSize: 30 }}>{selected.company}</h2>
+                    <div style={badgeStyle(meta.bg, meta.color)}>{meta.label}</div>
+                    <div style={badgeStyle("#fff", "#334155")}>{selected.id}</div>
                   </div>
                   <div
                     style={{
@@ -917,47 +958,21 @@ export default function App() {
                       color: "#475569",
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <Bot size={16} /> {selected.botWorker}
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <Users size={16} /> {selected.responsibleParty}
                     </div>
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 8,
-                        alignItems: "center",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
                       <Timer size={16} /> Age {selected.age}
                     </div>
                   </div>
                 </div>
 
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, auto)",
-                    gap: 10,
-                  }}
-                >
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(2, auto)", gap: 10 }}>
                   <button style={buttonStyle(true)}>Approve Submit</button>
-                  <button style={buttonStyle(false)}>
-                    Send to Exception
-                  </button>
+                  <button style={buttonStyle(false)}>Send to Exception</button>
                   <button style={buttonStyle(false)}>Retry Bot</button>
                   <button style={buttonStyle(false)}>Hold Case</button>
                 </div>
@@ -973,33 +988,25 @@ export default function App() {
               >
                 <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
                   <SectionLabel>Confidence</SectionLabel>
-                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>
-                    {selected.confidence}%
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>{selected.confidence}%</div>
                 </div>
                 <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
                   <SectionLabel>Current Stage</SectionLabel>
-                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>
-                    {selected.stage}
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{selected.stage}</div>
                   <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
                     Guard rails passed through current step.
                   </div>
                 </div>
                 <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
                   <SectionLabel>Issues</SectionLabel>
-                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>
-                    {selected.issueCount}
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>{selected.issueCount}</div>
                   <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
                     Exceptions or mismatches requiring attention.
                   </div>
                 </div>
                 <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
                   <SectionLabel>Recommended Action</SectionLabel>
-                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>
-                    {selected.agentAction}
-                  </div>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>{selected.agentAction}</div>
                   <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
                     Based on current validation and bot status.
                   </div>
@@ -1009,44 +1016,16 @@ export default function App() {
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
               <TabButton label="review" value="review" tab={tab} setTab={setTab} />
-              <TabButton
-                label="comparison"
-                value="comparison"
-                tab={tab}
-                setTab={setTab}
-              />
-              <TabButton
-                label="exceptions"
-                value="exceptions"
-                tab={tab}
-                setTab={setTab}
-              />
-              <TabButton
-                label="timeline"
-                value="timeline"
-                tab={tab}
-                setTab={setTab}
-              />
-              <TabButton
-                label="artifacts"
-                value="artifacts"
-                tab={tab}
-                setTab={setTab}
-              />
+              <TabButton label="comparison" value="comparison" tab={tab} setTab={setTab} />
+              <TabButton label="exceptions" value="exceptions" tab={tab} setTab={setTab} />
+              <TabButton label="timeline" value="timeline" tab={tab} setTab={setTab} />
+              <TabButton label="artifacts" value="artifacts" tab={tab} setTab={setTab} />
             </div>
 
             {tab === "review" && (
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 360px",
-                  gap: 24,
-                }}
-              >
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 360px", gap: 24 }}>
                 <div style={{ ...cardStyle(), padding: 24 }}>
-                  <h3 style={{ marginTop: 0, fontSize: 24 }}>
-                    Live Agent Review Screen
-                  </h3>
+                  <h3 style={{ marginTop: 0, fontSize: 24 }}>Live Agent Review Screen</h3>
 
                   <div
                     style={{
@@ -1058,14 +1037,7 @@ export default function App() {
                   >
                     <div style={softPanelStyle()}>
                       <SectionLabel>Entity Details</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 16,
-                          display: "grid",
-                          gap: 12,
-                          fontSize: 14,
-                        }}
-                      >
+                      <div style={{ marginTop: 16, display: "grid", gap: 12, fontSize: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Legal name</span>
                           <strong>{selected.legalName}</strong>
@@ -1087,14 +1059,7 @@ export default function App() {
 
                     <div style={softPanelStyle()}>
                       <SectionLabel>Responsible Party</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 16,
-                          display: "grid",
-                          gap: 12,
-                          fontSize: 14,
-                        }}
-                      >
+                      <div style={{ marginTop: 16, display: "grid", gap: 12, fontSize: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Name</span>
                           <strong>{selected.responsibleParty}</strong>
@@ -1116,19 +1081,10 @@ export default function App() {
 
                     <div style={softPanelStyle()}>
                       <SectionLabel>Address + Contact</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 16,
-                          display: "grid",
-                          gap: 12,
-                          fontSize: 14,
-                        }}
-                      >
+                      <div style={{ marginTop: 16, display: "grid", gap: 12, fontSize: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Physical address</span>
-                          <strong style={{ textAlign: "right" }}>
-                            {selected.sourceValues.address}
-                          </strong>
+                          <strong style={{ textAlign: "right" }}>{selected.sourceValues.address}</strong>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Phone</span>
@@ -1143,14 +1099,7 @@ export default function App() {
 
                     <div style={softPanelStyle()}>
                       <SectionLabel>Business Activity</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 16,
-                          display: "grid",
-                          gap: 12,
-                          fontSize: 14,
-                        }}
-                      >
+                      <div style={{ marginTop: 16, display: "grid", gap: 12, fontSize: 14 }}>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Category</span>
                           <strong style={{ textAlign: "right" }}>
@@ -1162,9 +1111,7 @@ export default function App() {
                           <strong>No</strong>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
-                          <span style={{ color: "#64748b" }}>
-                            Excise / ATF / Gambling
-                          </span>
+                          <span style={{ color: "#64748b" }}>Excise / ATF / Gambling</span>
                           <strong>No / No / No</strong>
                         </div>
                       </div>
@@ -1190,15 +1137,9 @@ export default function App() {
                     >
                       <div>
                         <SectionLabel>IRS Review Page Preview</SectionLabel>
-                        <div
-                          style={{
-                            marginTop: 8,
-                            color: "#475569",
-                            fontSize: 14,
-                          }}
-                        >
-                          This is where the live agent confirms the bot-captured
-                          review page without working directly inside the IRS site.
+                        <div style={{ marginTop: 8, color: "#475569", fontSize: 14 }}>
+                          This is where the live agent confirms the bot-captured review page without
+                          working directly inside the IRS site.
                         </div>
                       </div>
                       <button style={buttonStyle(false)}>
@@ -1216,24 +1157,10 @@ export default function App() {
                         padding: 20,
                       }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          marginBottom: 16,
-                        }}
-                      >
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 16 }}>
                         <div>
-                          <div style={{ fontSize: 20, fontWeight: 800 }}>
-                            Review & Submit Snapshot
-                          </div>
-                          <div
-                            style={{
-                              fontSize: 14,
-                              color: "#64748b",
-                              marginTop: 4,
-                            }}
-                          >
+                          <div style={{ fontSize: 20, fontWeight: 800 }}>Review & Submit Snapshot</div>
+                          <div style={{ fontSize: 14, color: "#64748b", marginTop: 4 }}>
                             Captured by bot at 09:16:49 · hash verified
                           </div>
                         </div>
@@ -1249,12 +1176,8 @@ export default function App() {
                             paddingBottom: 10,
                           }}
                         >
-                          <span style={{ color: "#64748b" }}>
-                            Organization type
-                          </span>
-                          <strong>
-                            Single Member Limited Liability Company (LLC)
-                          </strong>
+                          <span style={{ color: "#64748b" }}>Organization type</span>
+                          <strong>Single Member Limited Liability Company (LLC)</strong>
                         </div>
                         <div
                           style={{
@@ -1275,9 +1198,7 @@ export default function App() {
                             paddingBottom: 10,
                           }}
                         >
-                          <span style={{ color: "#64748b" }}>
-                            Responsible party
-                          </span>
+                          <span style={{ color: "#64748b" }}>Responsible party</span>
                           <strong>{selected.irsValues.responsibleParty}</strong>
                         </div>
                         <div
@@ -1288,20 +1209,11 @@ export default function App() {
                             paddingBottom: 10,
                           }}
                         >
-                          <span style={{ color: "#64748b" }}>
-                            Business activity
-                          </span>
+                          <span style={{ color: "#64748b" }}>Business activity</span>
                           <strong>{selected.irsValues.businessActivity}</strong>
                         </div>
-                        <div
-                          style={{
-                            display: "flex",
-                            justifyContent: "space-between",
-                          }}
-                        >
-                          <span style={{ color: "#64748b" }}>
-                            Reason for applying
-                          </span>
+                        <div style={{ display: "flex", justifyContent: "space-between" }}>
+                          <span style={{ color: "#64748b" }}>Reason for applying</span>
                           <strong>{selected.irsValues.reason}</strong>
                         </div>
                       </div>
@@ -1314,33 +1226,17 @@ export default function App() {
 
                   <div
                     style={{
-                      border: `1px solid ${
-                        selected.mismatches.length ? "#fecaca" : "#bbf7d0"
-                      }`,
+                      border: `1px solid ${selected.mismatches.length ? "#fecaca" : "#bbf7d0"}`,
                       background: selected.mismatches.length ? "#fef2f2" : "#f0fdf4",
                       borderRadius: 18,
                       padding: 16,
                     }}
                   >
-                    <div
-                      style={{
-                        display: "flex",
-                        gap: 10,
-                        alignItems: "flex-start",
-                      }}
-                    >
+                    <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                       {selected.mismatches.length ? (
-                        <AlertTriangle
-                          size={18}
-                          color="#dc2626"
-                          style={{ marginTop: 2 }}
-                        />
+                        <AlertTriangle size={18} color="#dc2626" style={{ marginTop: 2 }} />
                       ) : (
-                        <CheckCircle2
-                          size={18}
-                          color="#16a34a"
-                          style={{ marginTop: 2 }}
-                        />
+                        <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2 }} />
                       )}
                       <div>
                         <div
@@ -1371,31 +1267,16 @@ export default function App() {
                   <div style={{ ...softPanelStyle(), marginTop: 16 }}>
                     <SectionLabel>Fast Actions</SectionLabel>
                     <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-                      <button style={buttonStyle(true)}>
-                        Approve and Resume Bot Submission
-                      </button>
-                      <button style={buttonStyle(false)}>
-                        Approve and Open Next Case
-                      </button>
-                      <button style={buttonStyle(false)}>
-                        Reject to Exception Queue
-                      </button>
-                      <button style={buttonStyle(false)}>
-                        Request Source Data Edit
-                      </button>
+                      <button style={buttonStyle(true)}>Approve and Resume Bot Submission</button>
+                      <button style={buttonStyle(false)}>Approve and Open Next Case</button>
+                      <button style={buttonStyle(false)}>Reject to Exception Queue</button>
+                      <button style={buttonStyle(false)}>Request Source Data Edit</button>
                     </div>
                   </div>
 
                   <div style={{ ...softPanelStyle(), marginTop: 16 }}>
                     <SectionLabel>Agent Checklist</SectionLabel>
-                    <div
-                      style={{
-                        display: "grid",
-                        gap: 12,
-                        marginTop: 14,
-                        fontSize: 14,
-                      }}
-                    >
+                    <div style={{ display: "grid", gap: 12, marginTop: 14, fontSize: 14 }}>
                       {[
                         "Legal name matches source-of-truth record",
                         "Responsible party matches validated intake",
@@ -1403,10 +1284,7 @@ export default function App() {
                         "Business activity is specific enough",
                         "Reason for applying is correct",
                       ].map((item) => (
-                        <div
-                          key={item}
-                          style={{ display: "flex", gap: 10, alignItems: "center" }}
-                        >
+                        <div key={item} style={{ display: "flex", gap: 10, alignItems: "center" }}>
                           <CheckCircle2 size={16} color="#16a34a" />
                           <span>{item}</span>
                         </div>
@@ -1416,15 +1294,7 @@ export default function App() {
 
                   <div style={{ ...softPanelStyle(), marginTop: 16 }}>
                     <SectionLabel>Routing</SectionLabel>
-                    <div
-                      style={{
-                        marginTop: 12,
-                        display: "grid",
-                        gap: 10,
-                        fontSize: 14,
-                        color: "#475569",
-                      }}
-                    >
+                    <div style={{ marginTop: 12, display: "grid", gap: 10, fontSize: 14, color: "#475569" }}>
                       <div>Reviewer Mode: clean approvals and quick triage</div>
                       <div>Specialist Mode: mismatches, edits, escalations</div>
                       <div>Queue filter controls what work is shown on left</div>
@@ -1445,9 +1315,7 @@ export default function App() {
                     marginBottom: 8,
                   }}
                 >
-                  <h3 style={{ marginTop: 0, fontSize: 24 }}>
-                    Source vs IRS Comparison
-                  </h3>
+                  <h3 style={{ marginTop: 0, fontSize: 24 }}>Source vs IRS Comparison</h3>
                   <div style={{ display: "flex", gap: 10 }}>
                     <button style={buttonStyle(false)}>
                       <FileText size={16} style={{ marginRight: 8 }} />
@@ -1480,61 +1348,21 @@ export default function App() {
                   <div>Status</div>
                 </div>
 
-                <CompareRow
-                  label="Legal Name"
-                  source={selected.sourceValues.legalName}
-                  irs={selected.irsValues.legalName}
-                />
-                <CompareRow
-                  label="State"
-                  source={selected.sourceValues.state}
-                  irs={selected.irsValues.state}
-                />
-                <CompareRow
-                  label="County"
-                  source={selected.sourceValues.county}
-                  irs={selected.irsValues.county}
-                />
-                <CompareRow
-                  label="Responsible Party"
-                  source={selected.sourceValues.responsibleParty}
-                  irs={selected.irsValues.responsibleParty}
-                />
-                <CompareRow
-                  label="Business Activity"
-                  source={selected.sourceValues.businessActivity}
-                  irs={selected.irsValues.businessActivity}
-                />
-                <CompareRow
-                  label="Reason"
-                  source={selected.sourceValues.reason}
-                  irs={selected.irsValues.reason}
-                />
-                <CompareRow
-                  label="Address"
-                  source={selected.sourceValues.address}
-                  irs={selected.irsValues.address}
-                />
-                <CompareRow
-                  label="Phone"
-                  source={selected.sourceValues.phone}
-                  irs={selected.irsValues.phone}
-                />
+                <CompareRow label="Legal Name" source={selected.sourceValues.legalName} irs={selected.irsValues.legalName} />
+                <CompareRow label="State" source={selected.sourceValues.state} irs={selected.irsValues.state} />
+                <CompareRow label="County" source={selected.sourceValues.county} irs={selected.irsValues.county} />
+                <CompareRow label="Responsible Party" source={selected.sourceValues.responsibleParty} irs={selected.irsValues.responsibleParty} />
+                <CompareRow label="Business Activity" source={selected.sourceValues.businessActivity} irs={selected.irsValues.businessActivity} />
+                <CompareRow label="Reason" source={selected.sourceValues.reason} irs={selected.irsValues.reason} />
+                <CompareRow label="Address" source={selected.sourceValues.address} irs={selected.irsValues.address} />
+                <CompareRow label="Phone" source={selected.sourceValues.phone} irs={selected.irsValues.phone} />
               </div>
             )}
 
             {tab === "exceptions" && (
               <div style={{ ...cardStyle(), padding: 24 }}>
-                <h3 style={{ marginTop: 0, fontSize: 24 }}>
-                  Exception Handling Workspace
-                </h3>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 320px",
-                    gap: 24,
-                  }}
-                >
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>Exception Handling Workspace</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: 24 }}>
                   <div style={{ display: "grid", gap: 14 }}>
                     {(selected.mismatches.length
                       ? selected.mismatches
@@ -1543,51 +1371,23 @@ export default function App() {
                       <div
                         key={index}
                         style={{
-                          border: `1px solid ${
-                            selected.mismatches.length ? "#fecaca" : "#bbf7d0"
-                          }`,
-                          background: selected.mismatches.length
-                            ? "#fef2f2"
-                            : "#f0fdf4",
+                          border: `1px solid ${selected.mismatches.length ? "#fecaca" : "#bbf7d0"}`,
+                          background: selected.mismatches.length ? "#fef2f2" : "#f0fdf4",
                           borderRadius: 18,
                           padding: 16,
                         }}
                       >
-                        <div
-                          style={{
-                            display: "flex",
-                            gap: 10,
-                            alignItems: "flex-start",
-                          }}
-                        >
+                        <div style={{ display: "flex", gap: 10, alignItems: "flex-start" }}>
                           {selected.mismatches.length ? (
-                            <AlertTriangle
-                              size={18}
-                              color="#dc2626"
-                              style={{ marginTop: 2 }}
-                            />
+                            <AlertTriangle size={18} color="#dc2626" style={{ marginTop: 2 }} />
                           ) : (
-                            <CheckCircle2
-                              size={18}
-                              color="#16a34a"
-                              style={{ marginTop: 2 }}
-                            />
+                            <CheckCircle2 size={18} color="#16a34a" style={{ marginTop: 2 }} />
                           )}
                           <div>
                             <div style={{ fontWeight: 800 }}>
-                              {selected.mismatches.length
-                                ? `Issue ${index + 1}`
-                                : "Clean case"}
+                              {selected.mismatches.length ? `Issue ${index + 1}` : "Clean case"}
                             </div>
-                            <div
-                              style={{
-                                marginTop: 6,
-                                fontSize: 14,
-                                color: "#334155",
-                              }}
-                            >
-                              {issue}
-                            </div>
+                            <div style={{ marginTop: 6, fontSize: 14, color: "#334155" }}>{issue}</div>
                           </div>
                         </div>
                       </div>
@@ -1597,27 +1397,17 @@ export default function App() {
                   <div style={{ display: "grid", gap: 14 }}>
                     <div style={softPanelStyle()}>
                       <SectionLabel>Suggested Resolution</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 10,
-                          fontSize: 14,
-                          color: "#334155",
-                        }}
-                      >
-                        Route county mismatch to source-data editor and require
-                        agent confirmation before requeue.
+                      <div style={{ marginTop: 10, fontSize: 14, color: "#334155" }}>
+                        Route county mismatch to source-data editor and require agent confirmation
+                        before requeue.
                       </div>
                     </div>
 
                     <div style={softPanelStyle()}>
                       <SectionLabel>Specialist Actions</SectionLabel>
                       <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-                        <button style={buttonStyle(true)}>
-                          Assign to Specialist
-                        </button>
-                        <button style={buttonStyle(false)}>
-                          Edit Source Data
-                        </button>
+                        <button style={buttonStyle(true)}>Assign to Specialist</button>
+                        <button style={buttonStyle(false)}>Edit Source Data</button>
                         <button style={buttonStyle(false)}>Requeue Case</button>
                         <button style={buttonStyle(false)}>Cancel Filing</button>
                       </div>
@@ -1629,16 +1419,8 @@ export default function App() {
 
             {tab === "timeline" && (
               <div style={{ ...cardStyle(), padding: 24 }}>
-                <h3 style={{ marginTop: 0, fontSize: 24 }}>
-                  Bot Timeline + Session State
-                </h3>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "1fr 280px",
-                    gap: 24,
-                  }}
-                >
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>Bot Timeline + Session State</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 280px", gap: 24 }}>
                   <div style={{ display: "grid", gap: 12 }}>
                     {timeline.map((item) => (
                       <div
@@ -1651,25 +1433,12 @@ export default function App() {
                           gap: 16,
                         }}
                       >
-                        <div
-                          style={{
-                            minWidth: 72,
-                            fontSize: 14,
-                            fontWeight: 700,
-                            color: "#64748b",
-                          }}
-                        >
+                        <div style={{ minWidth: 72, fontSize: 14, fontWeight: 700, color: "#64748b" }}>
                           {item.time}
                         </div>
                         <div>
                           <div style={{ fontWeight: 700 }}>{item.label}</div>
-                          <div
-                            style={{
-                              marginTop: 4,
-                              fontSize: 14,
-                              color: "#64748b",
-                            }}
-                          >
+                          <div style={{ marginTop: 4, fontSize: 14, color: "#64748b" }}>
                             {selected.botWorker} · IRS EIN application session
                           </div>
                         </div>
@@ -1680,22 +1449,8 @@ export default function App() {
                   <div style={{ display: "grid", gap: 14 }}>
                     <div style={softPanelStyle()}>
                       <SectionLabel>Session Health</SectionLabel>
-                      <div
-                        style={{
-                          marginTop: 10,
-                          fontSize: 28,
-                          fontWeight: 800,
-                        }}
-                      >
-                        Healthy
-                      </div>
-                      <div
-                        style={{
-                          marginTop: 8,
-                          fontSize: 14,
-                          color: "#64748b",
-                        }}
-                      >
+                      <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>Healthy</div>
+                      <div style={{ marginTop: 8, fontSize: 14, color: "#64748b" }}>
                         9m 12s remaining before inactivity timeout.
                       </div>
                     </div>
@@ -1704,12 +1459,8 @@ export default function App() {
                       <SectionLabel>Worker Controls</SectionLabel>
                       <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
                         <button style={buttonStyle(false)}>Pause Session</button>
-                        <button style={buttonStyle(false)}>
-                          Refresh Heartbeat
-                        </button>
-                        <button style={buttonStyle(false)}>
-                          Move to Safe Hold
-                        </button>
+                        <button style={buttonStyle(false)}>Refresh Heartbeat</button>
+                        <button style={buttonStyle(false)}>Move to Safe Hold</button>
                       </div>
                     </div>
                   </div>
@@ -1719,16 +1470,8 @@ export default function App() {
 
             {tab === "artifacts" && (
               <div style={{ ...cardStyle(), padding: 24 }}>
-                <h3 style={{ marginTop: 0, fontSize: 24 }}>
-                  Artifacts + Audit Trail
-                </h3>
-                <div
-                  style={{
-                    display: "grid",
-                    gridTemplateColumns: "repeat(3, 1fr)",
-                    gap: 14,
-                  }}
-                >
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>Artifacts + Audit Trail</h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 14 }}>
                   {artifacts.map((item) => (
                     <div
                       key={item}
@@ -1738,28 +1481,14 @@ export default function App() {
                         padding: 16,
                       }}
                     >
-                      <div
-                        style={{
-                          display: "flex",
-                          justifyContent: "space-between",
-                          gap: 10,
-                        }}
-                      >
+                      <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                         <div>
                           <div style={{ fontWeight: 700 }}>{item}</div>
-                          <div
-                            style={{
-                              marginTop: 6,
-                              fontSize: 14,
-                              color: "#64748b",
-                            }}
-                          >
+                          <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
                             Stored for audit and replay review.
                           </div>
                         </div>
-                        <button
-                          style={{ ...buttonStyle(false), width: 42, padding: 0 }}
-                        >
+                        <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
                           <Download size={16} />
                         </button>
                       </div>
@@ -1769,56 +1498,32 @@ export default function App() {
               </div>
             )}
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "1fr 1fr",
-                gap: 24,
-              }}
-            >
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
               <div style={{ ...cardStyle(), padding: 24 }}>
                 <h3 style={{ marginTop: 0, fontSize: 22 }}>Operational Notes</h3>
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 14,
-                    fontSize: 14,
-                    color: "#475569",
-                  }}
-                >
+                <div style={{ display: "grid", gap: 14, fontSize: 14, color: "#475569" }}>
                   <div>
-                    This mock is designed around a single-screen agent workflow
-                    rather than having reviewers work directly in the IRS browser.
+                    This mock is designed around a single-screen agent workflow rather than
+                    having reviewers work directly in the IRS browser.
                   </div>
                   <div>
-                    Clean cases should take under one minute of human review.
-                    Exception cases are routed into a specialist workflow with
-                    explicit actions.
+                    Clean cases should take under one minute of human review. Exception cases are
+                    routed into a specialist workflow with explicit actions.
                   </div>
                   <div>
-                    Bot control actions are surfaced in the same console so
-                    operations teams can approve, retry, pause, and audit without
-                    switching tools.
+                    Bot control actions are surfaced in the same console so operations teams can
+                    approve, retry, pause, and audit without switching tools.
                   </div>
                 </div>
               </div>
 
               <div style={{ ...cardStyle(), padding: 24 }}>
-                <h3 style={{ marginTop: 0, fontSize: 22 }}>
-                  Next UI Decisions to Finalize
-                </h3>
-                <div
-                  style={{
-                    display: "grid",
-                    gap: 10,
-                    fontSize: 14,
-                    color: "#475569",
-                  }}
-                >
-                  <div>1. Whether reviewer and specialist should have different layouts.</div>
-                  <div>2. Whether “approve and open next case” should be the primary button.</div>
-                  <div>3. Whether source comparison should always be visible for exceptions.</div>
-                  <div>4. Which actions require reason codes or supervisor approval.</div>
+                <h3 style={{ marginTop: 0, fontSize: 22 }}>Developer Handoff Notes</h3>
+                <div style={{ display: "grid", gap: 10, fontSize: 14, color: "#475569" }}>
+                  <div>1. Preserve the single-screen review pattern as the default workflow.</div>
+                  <div>2. Keep source comparison highly visible for exception and mismatch cases.</div>
+                  <div>3. Separate reviewer and specialist permission sets at the action layer.</div>
+                  <div>4. Keep queue filters, quick actions, and workflow settings configurable.</div>
                 </div>
               </div>
             </div>
