@@ -24,6 +24,12 @@ import {
   PanelLeftClose,
   Activity,
   RefreshCw,
+  Presentation,
+  Layers3,
+  Workflow,
+  Database,
+  MonitorSmartphone,
+  Wrench,
 } from "lucide-react";
 
 const queueStats = [
@@ -289,6 +295,45 @@ const artifacts = [
   "Validation Report",
 ];
 
+const architectureCards = [
+  {
+    title: "Intake + Validation",
+    subtitle: "Structured source-of-truth payload",
+    icon: Database,
+    text: "Normalize formation data into a strict EIN case payload before any browser automation starts.",
+  },
+  {
+    title: "Queue + Orchestration",
+    subtitle: "Controls workers and routing",
+    icon: Workflow,
+    text: "Manage ready, in-progress, review, exception, and completed states while enforcing throttles and retries.",
+  },
+  {
+    title: "Playwright Workers",
+    subtitle: "Deterministic browser execution",
+    icon: MonitorSmartphone,
+    text: "Bots fill IRS steps, capture screenshots, pause for review, and resume only after approval.",
+  },
+  {
+    title: "Agent Console",
+    subtitle: "Single-screen live review",
+    icon: Users,
+    text: "Reviewers approve clean cases quickly while specialists resolve mismatches and source-data exceptions.",
+  },
+  {
+    title: "Artifacts + Audit",
+    subtitle: "Evidence and replay trail",
+    icon: Layers3,
+    text: "Store review screenshots, traces, payload hashes, validation reports, and completion evidence for every run.",
+  },
+  {
+    title: "Admin + Settings",
+    subtitle: "Operational controls",
+    icon: Wrench,
+    text: "Workflow options, permissions, thresholds, and queue rules should be configurable outside code where practical.",
+  },
+];
+
 function statusMeta(status) {
   switch (status) {
     case "waiting_review":
@@ -486,6 +531,35 @@ function NavButton({ icon: Icon, label }) {
   );
 }
 
+function ArchitectureCard({ item }) {
+  const Icon = item.icon;
+  return (
+    <div style={{ ...cardStyle(), padding: 18 }}>
+      <div
+        style={{
+          width: 40,
+          height: 40,
+          borderRadius: 14,
+          background: "#f1f5f9",
+          border: "1px solid #e2e8f0",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Icon size={18} color="#334155" />
+      </div>
+      <div style={{ marginTop: 14, fontWeight: 800, fontSize: 16 }}>{item.title}</div>
+      <div style={{ marginTop: 4, fontSize: 13, color: "#64748b", fontWeight: 700 }}>
+        {item.subtitle}
+      </div>
+      <div style={{ marginTop: 10, fontSize: 14, color: "#475569", lineHeight: 1.5 }}>
+        {item.text}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState("EIN-240318-001");
@@ -493,6 +567,7 @@ export default function App() {
   const [queueFilter, setQueueFilter] = useState("all");
   const [mode, setMode] = useState("reviewer");
   const [showSettings, setShowSettings] = useState(true);
+  const [presentationMode, setPresentationMode] = useState(true);
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
@@ -527,8 +602,9 @@ export default function App() {
     <div
       style={{
         minHeight: "100vh",
-        background:
-          "radial-gradient(circle at top left, #eef2ff 0%, #f8fafc 35%, #f8fafc 100%)",
+        background: presentationMode
+          ? "radial-gradient(circle at top left, #eef2ff 0%, #f8fafc 35%, #f8fafc 100%)"
+          : "#f8fafc",
         color: "#0f172a",
         fontFamily:
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
@@ -561,7 +637,15 @@ export default function App() {
                 <ShieldCheck size={20} />
               </div>
               <div>
-                <div style={{ fontSize: 12, fontWeight: 800, color: "#64748b", letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                <div
+                  style={{
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: "#64748b",
+                    letterSpacing: "0.12em",
+                    textTransform: "uppercase",
+                  }}
+                >
                   SimpleBiz EIN Automation
                 </div>
                 <div style={{ fontSize: 22, fontWeight: 800, marginTop: 2 }}>
@@ -570,12 +654,19 @@ export default function App() {
               </div>
             </div>
 
-            <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
               <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
                 <Bell size={16} />
               </button>
               <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
                 <RefreshCw size={16} />
+              </button>
+              <button
+                onClick={() => setPresentationMode((v) => !v)}
+                style={buttonStyle(false)}
+              >
+                <Presentation size={16} style={{ marginRight: 8 }} />
+                {presentationMode ? "Ops View" : "Presentation View"}
               </button>
               <button style={buttonStyle(false)}>
                 <Settings2 size={16} style={{ marginRight: 8 }} />
@@ -614,14 +705,14 @@ export default function App() {
                 }}
               >
                 <Activity size={16} />
-                Demo workspace for reviewer flow, exception handling, and developer handoff
+                Final demo build for UI review, workflow validation, and developer handoff
               </div>
               <h1 style={{ fontSize: 40, margin: "0 0 8px", lineHeight: 1.06 }}>
-                Version 4 · Handoff-Ready Operator Dashboard
+                Version 5 · Demo + Developer Handoff Workspace
               </h1>
               <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
-                Refined presentation pass with stronger top navigation, better queue visibility,
-                polished case cards, and a lightweight settings panel for stakeholder review.
+                Final polished demo with presentation-grade layout, clearer fake data labeling,
+                embedded architecture summary, and a stronger handoff story for engineering.
               </p>
             </div>
 
@@ -629,28 +720,16 @@ export default function App() {
               style={{
                 ...cardStyle(),
                 padding: 16,
-                minWidth: 320,
+                minWidth: 340,
                 background: "linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)",
               }}
             >
-              <SectionLabel>Shift Snapshot</SectionLabel>
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginTop: 14 }}>
-                <div>
-                  <div style={{ fontSize: 28, fontWeight: 800 }}>34s</div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>Avg clean review</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 28, fontWeight: 800 }}>97.6%</div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>Bot completion rate</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 28, fontWeight: 800 }}>3</div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>Escalations / hr</div>
-                </div>
-                <div>
-                  <div style={{ fontSize: 28, fontWeight: 800 }}>9m</div>
-                  <div style={{ fontSize: 13, color: "#64748b" }}>Session headroom</div>
-                </div>
+              <SectionLabel>Handoff Summary</SectionLabel>
+              <div style={{ display: "grid", gap: 10, marginTop: 14, fontSize: 14, color: "#475569" }}>
+                <div>• Single-screen review is the default operator pattern.</div>
+                <div>• Source vs IRS comparison supports exception resolution.</div>
+                <div>• Reviewer and specialist modes should separate permissions.</div>
+                <div>• Queue controls and workflow settings should become configurable admin options.</div>
               </div>
             </div>
           </div>
@@ -748,7 +827,7 @@ export default function App() {
               </div>
 
               <div style={{ ...cardStyle(), padding: 16 }}>
-                <SectionLabel>Agent Workflow Options</SectionLabel>
+                <SectionLabel>Workflow Options</SectionLabel>
                 <div style={{ display: "grid", gap: 14, marginTop: 14, fontSize: 14, color: "#475569" }}>
                   <label style={{ display: "flex", justifyContent: "space-between", gap: 12 }}>
                     <span>Auto-open next clean case</span>
@@ -766,6 +845,14 @@ export default function App() {
                     <span>Escalate mismatches to specialist</span>
                     <input type="checkbox" defaultChecked />
                   </label>
+                </div>
+              </div>
+
+              <div style={{ ...cardStyle(), padding: 16 }}>
+                <SectionLabel>Demo Notes</SectionLabel>
+                <div style={{ display: "grid", gap: 10, marginTop: 14, fontSize: 13, color: "#475569" }}>
+                  <div>All company names, IDs, and values here are demo placeholders for UI review.</div>
+                  <div>The live build should source this from structured EIN case records.</div>
                 </div>
               </div>
             </div>
@@ -903,7 +990,12 @@ export default function App() {
                           />
                           {itemMeta.label}
                         </div>
-                        <div style={badgeStyle(item.priority === "high" ? "#fee2e2" : "#fff", item.priority === "high" ? "#b91c1c" : "#334155")}>
+                        <div
+                          style={badgeStyle(
+                            item.priority === "high" ? "#fee2e2" : "#fff",
+                            item.priority === "high" ? "#b91c1c" : "#334155"
+                          )}
+                        >
                           {item.priority === "high" ? "High Priority" : "Normal"}
                         </div>
                         <div style={badgeStyle("#fff", "#334155")}>{item.stage}</div>
@@ -947,6 +1039,7 @@ export default function App() {
                     <h2 style={{ margin: 0, fontSize: 30 }}>{selected.company}</h2>
                     <div style={badgeStyle(meta.bg, meta.color)}>{meta.label}</div>
                     <div style={badgeStyle("#fff", "#334155")}>{selected.id}</div>
+                    <div style={badgeStyle("#eef2ff", "#4338ca")}>Demo Data</div>
                   </div>
                   <div
                     style={{
@@ -1020,6 +1113,7 @@ export default function App() {
               <TabButton label="exceptions" value="exceptions" tab={tab} setTab={setTab} />
               <TabButton label="timeline" value="timeline" tab={tab} setTab={setTab} />
               <TabButton label="artifacts" value="artifacts" tab={tab} setTab={setTab} />
+              <TabButton label="architecture" value="architecture" tab={tab} setTab={setTab} />
             </div>
 
             {tab === "review" && (
@@ -1493,6 +1587,36 @@ export default function App() {
                         </button>
                       </div>
                     </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {tab === "architecture" && (
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: 12, alignItems: "center" }}>
+                  <div>
+                    <h3 style={{ marginTop: 0, fontSize: 24 }}>System Architecture Summary</h3>
+                    <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
+                      Embedded handoff summary for the engineering team implementing the real system.
+                    </div>
+                  </div>
+                  <button style={buttonStyle(false)}>
+                    <Layers3 size={16} style={{ marginRight: 8 }} />
+                    Export Handoff Notes
+                  </button>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 16,
+                    marginTop: 18,
+                  }}
+                >
+                  {architectureCards.map((item) => (
+                    <ArchitectureCard key={item.title} item={item} />
                   ))}
                 </div>
               </div>
