@@ -3,11 +3,9 @@ import { motion } from "framer-motion";
 import {
   AlertTriangle,
   CheckCircle2,
-  Clock3,
   Search,
   Filter,
   PlayCircle,
-  RefreshCw,
   ShieldCheck,
   UserCheck,
   Users,
@@ -18,6 +16,9 @@ import {
   Download,
   ChevronRight,
   FileText,
+  FastForward,
+  SlidersHorizontal,
+  SplitSquareHorizontal,
 } from "lucide-react";
 
 const queueStats = [
@@ -45,9 +46,24 @@ const cases = [
     confidence: 99,
     issueCount: 0,
     agentAction: "Approve Submit",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "reviewer",
+    sourceValues: {
+      legalName: "SimpleBiz Agent LLC",
+      state: "CA",
+      county: "Los Angeles",
+      responsibleParty: "Robert Hammond",
       businessActivity: "Other > Service > Reg Agent Services",
+      reason: "Started a new business",
+      address: "23224 Crenshaw Blvd, Torrance, CA 90505",
+      phone: "888-298-8845",
+    },
+    irsValues: {
+      legalName: "SimpleBiz Agent LLC",
+      state: "CA",
+      county: "Los Angeles",
+      responsibleParty: "Robert Hammond",
+      businessActivity: "Other > Service > Reg Agent Services",
+      reason: "Started a new business",
       address: "23224 Crenshaw Blvd, Torrance, CA 90505",
       phone: "888-298-8845",
     },
@@ -68,9 +84,24 @@ const cases = [
     confidence: 82,
     issueCount: 2,
     agentAction: "Resolve Exception",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "specialist",
+    sourceValues: {
+      legalName: "Pacific Filing Services LLC",
+      state: "CA",
+      county: "Los Angeles",
+      responsibleParty: "Melissa Tran",
       businessActivity: "Other > Service",
+      reason: "Started a new business",
+      address: "4100 Birch St, Newport Beach, CA 92660",
+      phone: "949-555-0134",
+    },
+    irsValues: {
+      legalName: "Pacific Filing Services LLC",
+      state: "CA",
+      county: "Orange",
+      responsibleParty: "Melissa Tran",
+      businessActivity: "Other > Service",
+      reason: "Started a new business",
       address: "4100 Birch St, Newport Beach, CA 92660",
       phone: "949-555-0134",
     },
@@ -94,9 +125,24 @@ const cases = [
     confidence: 96,
     issueCount: 0,
     agentAction: "Monitor",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "reviewer",
+    sourceValues: {
+      legalName: "Desert Registered Agent Co",
+      state: "AZ",
+      county: "Maricopa",
+      responsibleParty: "Daniel Perez",
       businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
+      address: "7420 E Pinnacle Peak Rd, Scottsdale, AZ 85255",
+      phone: "602-555-0182",
+    },
+    irsValues: {
+      legalName: "Desert Registered Agent Co",
+      state: "AZ",
+      county: "Maricopa",
+      responsibleParty: "Daniel Perez",
+      businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
       address: "7420 E Pinnacle Peak Rd, Scottsdale, AZ 85255",
       phone: "602-555-0182",
     },
@@ -117,9 +163,24 @@ const cases = [
     confidence: 100,
     issueCount: 0,
     agentAction: "View Completion",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "reviewer",
+    sourceValues: {
+      legalName: "Northwest Business Support LLC",
+      state: "WA",
+      county: "King",
+      responsibleParty: "Amber Cole",
       businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
+      address: "1201 3rd Ave, Seattle, WA 98101",
+      phone: "206-555-0121",
+    },
+    irsValues: {
+      legalName: "Northwest Business Support LLC",
+      state: "WA",
+      county: "King",
+      responsibleParty: "Amber Cole",
+      businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
       address: "1201 3rd Ave, Seattle, WA 98101",
       phone: "206-555-0121",
     },
@@ -140,9 +201,24 @@ const cases = [
     confidence: 97,
     issueCount: 0,
     agentAction: "Approve Submit",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "reviewer",
+    sourceValues: {
+      legalName: "Mountain State Filings LLC",
+      state: "UT",
+      county: "Salt Lake",
+      responsibleParty: "Erin Blake",
       businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
+      address: "210 Main St, Salt Lake City, UT 84101",
+      phone: "801-555-0191",
+    },
+    irsValues: {
+      legalName: "Mountain State Filings LLC",
+      state: "UT",
+      county: "Salt Lake",
+      responsibleParty: "Erin Blake",
+      businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
       address: "210 Main St, Salt Lake City, UT 84101",
       phone: "801-555-0191",
     },
@@ -163,9 +239,24 @@ const cases = [
     confidence: 95,
     issueCount: 0,
     agentAction: "Queue for Bot",
-    reviewSummary: {
-      reason: "Started a new business",
+    reviewerType: "reviewer",
+    sourceValues: {
+      legalName: "Sunbelt Entity Services LLC",
+      state: "TX",
+      county: "Dallas",
+      responsibleParty: "Chris Morgan",
       businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
+      address: "500 Elm St, Dallas, TX 75202",
+      phone: "972-555-0122",
+    },
+    irsValues: {
+      legalName: "Sunbelt Entity Services LLC",
+      state: "TX",
+      county: "Dallas",
+      responsibleParty: "Chris Morgan",
+      businessActivity: "Other > Service > Registered Agent Services",
+      reason: "Started a new business",
       address: "500 Elm St, Dallas, TX 75202",
       phone: "972-555-0122",
     },
@@ -329,27 +420,91 @@ function TabButton({ label, value, tab, setTab }) {
   );
 }
 
+function CompareRow({ label, source, irs }) {
+  const mismatch = source !== irs;
+  return (
+    <div
+      style={{
+        display: "grid",
+        gridTemplateColumns: "180px 1fr 1fr 100px",
+        gap: 12,
+        alignItems: "start",
+        padding: "12px 0",
+        borderBottom: "1px solid #e2e8f0",
+      }}
+    >
+      <div style={{ color: "#64748b", fontWeight: 700, fontSize: 13 }}>{label}</div>
+      <div
+        style={{
+          background: "#f8fafc",
+          border: "1px solid #e2e8f0",
+          borderRadius: 12,
+          padding: 10,
+          fontSize: 13,
+        }}
+      >
+        {source}
+      </div>
+      <div
+        style={{
+          background: mismatch ? "#fef2f2" : "#f8fafc",
+          border: `1px solid ${mismatch ? "#fecaca" : "#e2e8f0"}`,
+          borderRadius: 12,
+          padding: 10,
+          fontSize: 13,
+        }}
+      >
+        {irs}
+      </div>
+      <div>
+        <span
+          style={badgeStyle(
+            mismatch ? "#fee2e2" : "#dcfce7",
+            mismatch ? "#b91c1c" : "#166534"
+          )}
+        >
+          {mismatch ? "Mismatch" : "Match"}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState("EIN-240318-001");
   const [tab, setTab] = useState("review");
+  const [queueFilter, setQueueFilter] = useState("all");
+  const [mode, setMode] = useState("reviewer");
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     return cases.filter((item) => {
-      return (
+      const matchesSearch =
         item.id.toLowerCase().includes(q) ||
         item.company.toLowerCase().includes(q) ||
         item.responsibleParty.toLowerCase().includes(q) ||
         item.state.toLowerCase().includes(q) ||
-        item.county.toLowerCase().includes(q)
-      );
+        item.county.toLowerCase().includes(q);
+
+      const matchesQueue =
+        queueFilter === "all" ? true : item.status === queueFilter;
+
+      const matchesMode =
+        mode === "reviewer"
+          ? item.reviewerType === "reviewer" || item.status !== "exception"
+          : true;
+
+      return matchesSearch && matchesQueue && matchesMode;
     });
-  }, [search]);
+  }, [search, queueFilter, mode]);
 
   const selected =
     filtered.find((item) => item.id === selectedId) || filtered[0] || cases[0];
   const meta = statusMeta(selected.status);
+
+  const reviewQueue = filtered.filter((c) => c.status === "waiting_review");
+  const nextCase = reviewQueue[0];
 
   return (
     <div
@@ -361,7 +516,7 @@ export default function App() {
           'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
       }}
     >
-      <div style={{ maxWidth: 1600, margin: "0 auto", padding: 28 }}>
+      <div style={{ maxWidth: 1640, margin: "0 auto", padding: 28 }}>
         <motion.div
           initial={{ opacity: 0, y: 8 }}
           animate={{ opacity: 1, y: 0 }}
@@ -379,13 +534,46 @@ export default function App() {
             <ShieldCheck size={16} />
             EIN Operations Demo · Live Agent Review Console
           </div>
-          <h1 style={{ fontSize: 40, margin: "12px 0 8px", lineHeight: 1.1 }}>
-            EIN Review + Exception Handling Workspace
-          </h1>
-          <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
-            Demo UI for bot coordination, live review, exception routing, and
-            completion tracking before handing the project to developers.
-          </p>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              gap: 20,
+              alignItems: "flex-start",
+              marginTop: 12,
+            }}
+          >
+            <div>
+              <h1
+                style={{
+                  fontSize: 40,
+                  margin: "0 0 8px",
+                  lineHeight: 1.1,
+                }}
+              >
+                EIN Review + Exception Handling Workspace
+              </h1>
+              <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
+                Demo UI for bot coordination, live review, exception routing, and
+                completion tracking before handing the project to developers.
+              </p>
+            </div>
+
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <button style={buttonStyle(false)}>
+                <SlidersHorizontal size={16} style={{ marginRight: 8 }} />
+                Queue Rules
+              </button>
+              <button style={buttonStyle(false)}>
+                <SplitSquareHorizontal size={16} style={{ marginRight: 8 }} />
+                Open Source Compare
+              </button>
+              <button style={buttonStyle(true)}>
+                <FastForward size={16} style={{ marginRight: 8 }} />
+                Next Review Case
+              </button>
+            </div>
+          </div>
         </motion.div>
 
         <div
@@ -393,12 +581,117 @@ export default function App() {
             display: "grid",
             gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
             gap: 16,
-            marginBottom: 28,
+            marginBottom: 22,
           }}
         >
           {queueStats.map((stat) => (
             <StatCard key={stat.label} stat={stat} />
           ))}
+        </div>
+
+        <div
+          style={{
+            ...cardStyle(),
+            padding: 18,
+            marginBottom: 22,
+            display: "flex",
+            justifyContent: "space-between",
+            gap: 16,
+            alignItems: "center",
+            flexWrap: "wrap",
+          }}
+        >
+          <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+            {[
+              ["all", "All"],
+              ["ready", "Ready"],
+              ["in_progress", "In Progress"],
+              ["waiting_review", "Waiting Review"],
+              ["exception", "Exceptions"],
+              ["completed", "Completed"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                onClick={() => setQueueFilter(value)}
+                style={{
+                  ...buttonStyle(queueFilter === value),
+                  height: 38,
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+            <span style={{ fontSize: 13, fontWeight: 700, color: "#64748b" }}>
+              Mode
+            </span>
+            <button
+              onClick={() => setMode("reviewer")}
+              style={{
+                ...buttonStyle(mode === "reviewer"),
+                height: 38,
+              }}
+            >
+              Reviewer
+            </button>
+            <button
+              onClick={() => setMode("specialist")}
+              style={{
+                ...buttonStyle(mode === "specialist"),
+                height: 38,
+              }}
+            >
+              Specialist
+            </button>
+          </div>
+        </div>
+
+        <div
+          style={{
+            ...cardStyle(),
+            padding: 18,
+            marginBottom: 24,
+            display: "grid",
+            gridTemplateColumns: "1.2fr 1fr 1fr 1fr",
+            gap: 16,
+          }}
+        >
+          <div style={softPanelStyle()}>
+            <SectionLabel>Fast Review Queue</SectionLabel>
+            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>
+              {reviewQueue.length}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
+              Cases currently waiting for human approval.
+            </div>
+          </div>
+          <div style={softPanelStyle()}>
+            <SectionLabel>Next Recommended Case</SectionLabel>
+            <div style={{ marginTop: 10, fontSize: 16, fontWeight: 800 }}>
+              {nextCase ? nextCase.company : "No review cases"}
+            </div>
+            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
+              {nextCase ? `${nextCase.id} · ${nextCase.age}` : "Queue is clear"}
+            </div>
+          </div>
+          <div style={softPanelStyle()}>
+            <SectionLabel>Reviewer SLA</SectionLabel>
+            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>
+              34s
+            </div>
+            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
+              Average clean-case review time.
+            </div>
+          </div>
+          <div style={softPanelStyle()}>
+            <SectionLabel>Escalations</SectionLabel>
+            <div style={{ marginTop: 10, fontSize: 28, fontWeight: 800 }}>3</div>
+            <div style={{ marginTop: 6, fontSize: 14, color: "#64748b" }}>
+              Cases routed to specialists this hour.
+            </div>
+          </div>
         </div>
 
         <div
@@ -459,7 +752,7 @@ export default function App() {
               style={{
                 display: "grid",
                 gap: 12,
-                maxHeight: 980,
+                maxHeight: 1120,
                 overflow: "auto",
                 paddingRight: 4,
               }}
@@ -715,9 +1008,10 @@ export default function App() {
             </div>
 
             <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <TabButton label="review" value="review" tab={tab} setTab={setTab} />
               <TabButton
-                label="review"
-                value="review"
+                label="comparison"
+                value="comparison"
                 tab={tab}
                 setTab={setTab}
               />
@@ -786,7 +1080,7 @@ export default function App() {
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Reason</span>
-                          <strong>{selected.reviewSummary.reason}</strong>
+                          <strong>{selected.sourceValues.reason}</strong>
                         </div>
                       </div>
                     </div>
@@ -833,12 +1127,12 @@ export default function App() {
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Physical address</span>
                           <strong style={{ textAlign: "right" }}>
-                            {selected.reviewSummary.address}
+                            {selected.sourceValues.address}
                           </strong>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Phone</span>
-                          <strong>{selected.reviewSummary.phone}</strong>
+                          <strong>{selected.sourceValues.phone}</strong>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Mailing</span>
@@ -860,7 +1154,7 @@ export default function App() {
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
                           <span style={{ color: "#64748b" }}>Category</span>
                           <strong style={{ textAlign: "right" }}>
-                            {selected.reviewSummary.businessActivity}
+                            {selected.sourceValues.businessActivity}
                           </strong>
                         </div>
                         <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
@@ -904,8 +1198,7 @@ export default function App() {
                           }}
                         >
                           This is where the live agent confirms the bot-captured
-                          review page without working directly inside the IRS
-                          site.
+                          review page without working directly inside the IRS site.
                         </div>
                       </div>
                       <button style={buttonStyle(false)}>
@@ -972,7 +1265,7 @@ export default function App() {
                           }}
                         >
                           <span style={{ color: "#64748b" }}>Legal name</span>
-                          <strong>{selected.legalName}</strong>
+                          <strong>{selected.irsValues.legalName}</strong>
                         </div>
                         <div
                           style={{
@@ -985,7 +1278,7 @@ export default function App() {
                           <span style={{ color: "#64748b" }}>
                             Responsible party
                           </span>
-                          <strong>{selected.responsibleParty}</strong>
+                          <strong>{selected.irsValues.responsibleParty}</strong>
                         </div>
                         <div
                           style={{
@@ -998,7 +1291,7 @@ export default function App() {
                           <span style={{ color: "#64748b" }}>
                             Business activity
                           </span>
-                          <strong>{selected.reviewSummary.businessActivity}</strong>
+                          <strong>{selected.irsValues.businessActivity}</strong>
                         </div>
                         <div
                           style={{
@@ -1009,7 +1302,7 @@ export default function App() {
                           <span style={{ color: "#64748b" }}>
                             Reason for applying
                           </span>
-                          <strong>{selected.reviewSummary.reason}</strong>
+                          <strong>{selected.irsValues.reason}</strong>
                         </div>
                       </div>
                     </div>
@@ -1021,8 +1314,10 @@ export default function App() {
 
                   <div
                     style={{
-                      border: "1px solid #bbf7d0",
-                      background: "#f0fdf4",
+                      border: `1px solid ${
+                        selected.mismatches.length ? "#fecaca" : "#bbf7d0"
+                      }`,
+                      background: selected.mismatches.length ? "#fef2f2" : "#f0fdf4",
                       borderRadius: 18,
                       padding: 16,
                     }}
@@ -1034,25 +1329,60 @@ export default function App() {
                         alignItems: "flex-start",
                       }}
                     >
-                      <CheckCircle2
-                        size={18}
-                        color="#16a34a"
-                        style={{ marginTop: 2 }}
-                      />
+                      {selected.mismatches.length ? (
+                        <AlertTriangle
+                          size={18}
+                          color="#dc2626"
+                          style={{ marginTop: 2 }}
+                        />
+                      ) : (
+                        <CheckCircle2
+                          size={18}
+                          color="#16a34a"
+                          style={{ marginTop: 2 }}
+                        />
+                      )}
                       <div>
-                        <div style={{ fontWeight: 800, color: "#166534" }}>
-                          Guard rails currently passed
+                        <div
+                          style={{
+                            fontWeight: 800,
+                            color: selected.mismatches.length ? "#991b1b" : "#166534",
+                          }}
+                        >
+                          {selected.mismatches.length
+                            ? "Mismatch attention required"
+                            : "Guard rails currently passed"}
                         </div>
                         <div
                           style={{
                             marginTop: 6,
                             fontSize: 14,
-                            color: "#166534",
+                            color: selected.mismatches.length ? "#991b1b" : "#166534",
                           }}
                         >
-                          No source-to-review mismatches detected for this case.
+                          {selected.mismatches.length
+                            ? "Source and IRS values differ. Specialist review is recommended before submit."
+                            : "No source-to-review mismatches detected for this case."}
                         </div>
                       </div>
+                    </div>
+                  </div>
+
+                  <div style={{ ...softPanelStyle(), marginTop: 16 }}>
+                    <SectionLabel>Fast Actions</SectionLabel>
+                    <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+                      <button style={buttonStyle(true)}>
+                        Approve and Resume Bot Submission
+                      </button>
+                      <button style={buttonStyle(false)}>
+                        Approve and Open Next Case
+                      </button>
+                      <button style={buttonStyle(false)}>
+                        Reject to Exception Queue
+                      </button>
+                      <button style={buttonStyle(false)}>
+                        Request Source Data Edit
+                      </button>
                     </div>
                   </div>
 
@@ -1085,20 +1415,111 @@ export default function App() {
                   </div>
 
                   <div style={{ ...softPanelStyle(), marginTop: 16 }}>
-                    <SectionLabel>Decision Actions</SectionLabel>
-                    <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
-                      <button style={buttonStyle(true)}>
-                        Approve and Resume Bot Submission
-                      </button>
-                      <button style={buttonStyle(false)}>
-                        Reject to Exception Queue
-                      </button>
-                      <button style={buttonStyle(false)}>
-                        Request Source Data Edit
-                      </button>
+                    <SectionLabel>Routing</SectionLabel>
+                    <div
+                      style={{
+                        marginTop: 12,
+                        display: "grid",
+                        gap: 10,
+                        fontSize: 14,
+                        color: "#475569",
+                      }}
+                    >
+                      <div>Reviewer Mode: clean approvals and quick triage</div>
+                      <div>Specialist Mode: mismatches, edits, escalations</div>
+                      <div>Queue filter controls what work is shown on left</div>
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {tab === "comparison" && (
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 12,
+                    alignItems: "center",
+                    marginBottom: 8,
+                  }}
+                >
+                  <h3 style={{ marginTop: 0, fontSize: 24 }}>
+                    Source vs IRS Comparison
+                  </h3>
+                  <div style={{ display: "flex", gap: 10 }}>
+                    <button style={buttonStyle(false)}>
+                      <FileText size={16} style={{ marginRight: 8 }} />
+                      Export Comparison
+                    </button>
+                    <button style={buttonStyle(false)}>
+                      <Eye size={16} style={{ marginRight: 8 }} />
+                      Open Source Record
+                    </button>
+                  </div>
+                </div>
+
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "180px 1fr 1fr 100px",
+                    gap: 12,
+                    padding: "0 0 12px",
+                    borderBottom: "2px solid #e2e8f0",
+                    fontSize: 12,
+                    fontWeight: 800,
+                    color: "#64748b",
+                    textTransform: "uppercase",
+                    letterSpacing: "0.08em",
+                  }}
+                >
+                  <div>Field</div>
+                  <div>Source Record</div>
+                  <div>IRS Review</div>
+                  <div>Status</div>
+                </div>
+
+                <CompareRow
+                  label="Legal Name"
+                  source={selected.sourceValues.legalName}
+                  irs={selected.irsValues.legalName}
+                />
+                <CompareRow
+                  label="State"
+                  source={selected.sourceValues.state}
+                  irs={selected.irsValues.state}
+                />
+                <CompareRow
+                  label="County"
+                  source={selected.sourceValues.county}
+                  irs={selected.irsValues.county}
+                />
+                <CompareRow
+                  label="Responsible Party"
+                  source={selected.sourceValues.responsibleParty}
+                  irs={selected.irsValues.responsibleParty}
+                />
+                <CompareRow
+                  label="Business Activity"
+                  source={selected.sourceValues.businessActivity}
+                  irs={selected.irsValues.businessActivity}
+                />
+                <CompareRow
+                  label="Reason"
+                  source={selected.sourceValues.reason}
+                  irs={selected.irsValues.reason}
+                />
+                <CompareRow
+                  label="Address"
+                  source={selected.sourceValues.address}
+                  irs={selected.irsValues.address}
+                />
+                <CompareRow
+                  label="Phone"
+                  source={selected.sourceValues.phone}
+                  irs={selected.irsValues.phone}
+                />
               </div>
             )}
 
@@ -1189,7 +1610,7 @@ export default function App() {
                     </div>
 
                     <div style={softPanelStyle()}>
-                      <SectionLabel>Exception Actions</SectionLabel>
+                      <SectionLabel>Specialist Actions</SectionLabel>
                       <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
                         <button style={buttonStyle(true)}>
                           Assign to Specialist
@@ -1367,8 +1788,7 @@ export default function App() {
                 >
                   <div>
                     This mock is designed around a single-screen agent workflow
-                    rather than having reviewers work directly in the IRS
-                    browser.
+                    rather than having reviewers work directly in the IRS browser.
                   </div>
                   <div>
                     Clean cases should take under one minute of human review.
@@ -1395,22 +1815,10 @@ export default function App() {
                     color: "#475569",
                   }}
                 >
-                  <div>
-                    1. Whether review and exception handling should live on one
-                    page or separate pages.
-                  </div>
-                  <div>
-                    2. Whether agents should see source values side-by-side with
-                    bot-entered values.
-                  </div>
-                  <div>
-                    3. Whether approvals should require a reason code or only
-                    exceptions should.
-                  </div>
-                  <div>
-                    4. Which actions are available to standard reviewers vs
-                    specialist leads.
-                  </div>
+                  <div>1. Whether reviewer and specialist should have different layouts.</div>
+                  <div>2. Whether “approve and open next case” should be the primary button.</div>
+                  <div>3. Whether source comparison should always be visible for exceptions.</div>
+                  <div>4. Which actions require reason codes or supervisor approval.</div>
                 </div>
               </div>
             </div>
