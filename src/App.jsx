@@ -3,9 +3,11 @@ import { motion } from "framer-motion";
 import {
   AlertTriangle,
   CheckCircle2,
+  Clock3,
   Search,
   Filter,
   PlayCircle,
+  RefreshCw,
   ShieldCheck,
   UserCheck,
   Users,
@@ -15,155 +17,1402 @@ import {
   Timer,
   Download,
   ChevronRight,
+  FileText,
 } from "lucide-react";
 
 const queueStats = [
-  { label: "Ready", value: 42 },
-  { label: "In Progress", value: 11 },
-  { label: "Review", value: 18 },
-  { label: "Exceptions", value: 7 },
-  { label: "Completed", value: 126 },
+  { label: "Ready for Bot", value: 42, icon: PlayCircle },
+  { label: "In Progress", value: 11, icon: Bot },
+  { label: "Waiting Review", value: 18, icon: UserCheck },
+  { label: "Exceptions", value: 7, icon: AlertTriangle },
+  { label: "Completed Today", value: 126, icon: CheckCircle2 },
+  { label: "Timed Out", value: 2, icon: PauseCircle },
 ];
 
 const cases = [
   {
-    id: "EIN-001",
+    id: "EIN-240318-001",
     company: "SimpleBiz Agent LLC",
-    status: "review",
+    legalName: "SimpleBiz Agent LLC",
+    status: "waiting_review",
+    priority: "normal",
     state: "CA",
+    county: "Los Angeles",
     responsibleParty: "Robert Hammond",
-    issues: 0,
+    botWorker: "Bot-04",
+    age: "2m ago",
+    stage: "Review & Submit",
+    confidence: 99,
+    issueCount: 0,
+    agentAction: "Approve Submit",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service > Reg Agent Services",
+      address: "23224 Crenshaw Blvd, Torrance, CA 90505",
+      phone: "888-298-8845",
+    },
+    mismatches: [],
   },
   {
-    id: "EIN-002",
-    company: "Pacific Filing Services",
+    id: "EIN-240318-002",
+    company: "Pacific Filing Services LLC",
+    legalName: "Pacific Filing Services LLC",
     status: "exception",
+    priority: "high",
     state: "CA",
+    county: "Orange",
     responsibleParty: "Melissa Tran",
-    issues: 2,
+    botWorker: "Bot-02",
+    age: "6m ago",
+    stage: "Additional Details",
+    confidence: 82,
+    issueCount: 2,
+    agentAction: "Resolve Exception",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service",
+      address: "4100 Birch St, Newport Beach, CA 92660",
+      phone: "949-555-0134",
+    },
+    mismatches: [
+      "Business activity description too generic for submission guard rails.",
+      "County from source record differs from county on state filing extract.",
+    ],
   },
   {
-    id: "EIN-003",
-    company: "Desert Agent Co",
+    id: "EIN-240318-003",
+    company: "Desert Registered Agent Co",
+    legalName: "Desert Registered Agent Co",
     status: "in_progress",
+    priority: "normal",
     state: "AZ",
+    county: "Maricopa",
     responsibleParty: "Daniel Perez",
-    issues: 0,
+    botWorker: "Bot-01",
+    age: "1m ago",
+    stage: "Addresses",
+    confidence: 96,
+    issueCount: 0,
+    agentAction: "Monitor",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service > Registered Agent Services",
+      address: "7420 E Pinnacle Peak Rd, Scottsdale, AZ 85255",
+      phone: "602-555-0182",
+    },
+    mismatches: [],
+  },
+  {
+    id: "EIN-240318-004",
+    company: "Northwest Business Support LLC",
+    legalName: "Northwest Business Support LLC",
+    status: "completed",
+    priority: "normal",
+    state: "WA",
+    county: "King",
+    responsibleParty: "Amber Cole",
+    botWorker: "Bot-03",
+    age: "14m ago",
+    stage: "EIN Assigned",
+    confidence: 100,
+    issueCount: 0,
+    agentAction: "View Completion",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service > Registered Agent Services",
+      address: "1201 3rd Ave, Seattle, WA 98101",
+      phone: "206-555-0121",
+    },
+    mismatches: [],
+  },
+  {
+    id: "EIN-240318-005",
+    company: "Mountain State Filings LLC",
+    legalName: "Mountain State Filings LLC",
+    status: "waiting_review",
+    priority: "normal",
+    state: "UT",
+    county: "Salt Lake",
+    responsibleParty: "Erin Blake",
+    botWorker: "Bot-06",
+    age: "4m ago",
+    stage: "Review & Submit",
+    confidence: 97,
+    issueCount: 0,
+    agentAction: "Approve Submit",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service > Registered Agent Services",
+      address: "210 Main St, Salt Lake City, UT 84101",
+      phone: "801-555-0191",
+    },
+    mismatches: [],
+  },
+  {
+    id: "EIN-240318-006",
+    company: "Sunbelt Entity Services LLC",
+    legalName: "Sunbelt Entity Services LLC",
+    status: "ready",
+    priority: "normal",
+    state: "TX",
+    county: "Dallas",
+    responsibleParty: "Chris Morgan",
+    botWorker: "Unassigned",
+    age: "just now",
+    stage: "Ready for Bot",
+    confidence: 95,
+    issueCount: 0,
+    agentAction: "Queue for Bot",
+    reviewSummary: {
+      reason: "Started a new business",
+      businessActivity: "Other > Service > Registered Agent Services",
+      address: "500 Elm St, Dallas, TX 75202",
+      phone: "972-555-0122",
+    },
+    mismatches: [],
   },
 ];
 
-function badge(status) {
-  const colors = {
-    review: "#f59e0b",
-    in_progress: "#2563eb",
-    exception: "#dc2626",
-  };
+const timeline = [
+  { time: "09:14:02", label: "Case created from intake payload" },
+  { time: "09:14:09", label: "Validation checks passed" },
+  { time: "09:14:15", label: "Assigned to Bot-04" },
+  { time: "09:15:34", label: "Identity step completed" },
+  { time: "09:16:22", label: "IRS Step 4 completed" },
+  { time: "09:16:49", label: "Review page captured and hashed" },
+  { time: "09:16:55", label: "Queued for live agent approval" },
+];
+
+const artifacts = [
+  "IRS Review Screenshot",
+  "Step 1 Screenshot",
+  "Step 2 Screenshot",
+  "Step 3 Screenshot",
+  "Browser Trace",
+  "Normalized Payload JSON",
+  "Validation Report",
+];
+
+function statusMeta(status) {
+  switch (status) {
+    case "waiting_review":
+      return { label: "Waiting Review", color: "#b45309", bg: "#fef3c7" };
+    case "in_progress":
+      return { label: "In Progress", color: "#1d4ed8", bg: "#dbeafe" };
+    case "exception":
+      return { label: "Exception", color: "#b91c1c", bg: "#fee2e2" };
+    case "completed":
+      return { label: "Completed", color: "#047857", bg: "#d1fae5" };
+    case "ready":
+      return { label: "Ready", color: "#334155", bg: "#e2e8f0" };
+    default:
+      return { label: status, color: "#475569", bg: "#f1f5f9" };
+  }
+}
+
+function badgeStyle(bg, color) {
   return {
-    background: "#f1f5f9",
-    color: colors[status] || "#334155",
-    padding: "4px 10px",
-    borderRadius: 20,
+    display: "inline-flex",
+    alignItems: "center",
+    gap: 6,
+    padding: "6px 10px",
+    borderRadius: 999,
+    background: bg,
+    color,
     fontSize: 12,
-    fontWeight: 600,
+    fontWeight: 700,
+    border: "1px solid rgba(15,23,42,0.08)",
+    whiteSpace: "nowrap",
   };
+}
+
+function cardStyle() {
+  return {
+    background: "#fff",
+    border: "1px solid #e2e8f0",
+    borderRadius: 20,
+    boxShadow: "0 1px 2px rgba(15,23,42,0.05)",
+  };
+}
+
+function buttonStyle(primary = false) {
+  return {
+    height: 42,
+    padding: "0 16px",
+    borderRadius: 14,
+    border: primary ? "none" : "1px solid #cbd5e1",
+    background: primary ? "#0f172a" : "#fff",
+    color: primary ? "#fff" : "#0f172a",
+    fontWeight: 700,
+    cursor: "pointer",
+  };
+}
+
+function softPanelStyle() {
+  return {
+    background: "#f8fafc",
+    borderRadius: 18,
+    padding: 16,
+    border: "1px solid #e2e8f0",
+  };
+}
+
+function StatCard({ stat }) {
+  const Icon = stat.icon;
+  return (
+    <div style={{ ...cardStyle(), padding: 20 }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+        }}
+      >
+        <div>
+          <div style={{ fontSize: 14, color: "#64748b" }}>{stat.label}</div>
+          <div
+            style={{
+              marginTop: 10,
+              fontSize: 32,
+              fontWeight: 800,
+              color: "#0f172a",
+            }}
+          >
+            {stat.value}
+          </div>
+        </div>
+        <div
+          style={{
+            background: "#f1f5f9",
+            borderRadius: 16,
+            padding: 12,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <Icon size={20} color="#334155" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <div
+      style={{
+        fontSize: 11,
+        fontWeight: 800,
+        letterSpacing: "0.14em",
+        textTransform: "uppercase",
+        color: "#64748b",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function TabButton({ label, value, tab, setTab }) {
+  const active = tab === value;
+  return (
+    <button
+      onClick={() => setTab(value)}
+      style={{
+        ...buttonStyle(active),
+        textTransform: "capitalize",
+      }}
+    >
+      {label}
+    </button>
+  );
 }
 
 export default function App() {
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState(cases[0]);
+  const [selectedId, setSelectedId] = useState("EIN-240318-001");
+  const [tab, setTab] = useState("review");
 
   const filtered = useMemo(() => {
-    return cases.filter((c) =>
-      c.company.toLowerCase().includes(search.toLowerCase())
-    );
+    const q = search.toLowerCase();
+    return cases.filter((item) => {
+      return (
+        item.id.toLowerCase().includes(q) ||
+        item.company.toLowerCase().includes(q) ||
+        item.responsibleParty.toLowerCase().includes(q) ||
+        item.state.toLowerCase().includes(q) ||
+        item.county.toLowerCase().includes(q)
+      );
+    });
   }, [search]);
 
-  return (
-    <div style={{ fontFamily: "sans-serif", padding: 20 }}>
-      <h1 style={{ fontSize: 32 }}>EIN Operations Dashboard</h1>
+  const selected =
+    filtered.find((item) => item.id === selectedId) || filtered[0] || cases[0];
+  const meta = statusMeta(selected.status);
 
-      {/* Stats */}
-      <div style={{ display: "flex", gap: 10, marginTop: 20 }}>
-        {queueStats.map((s) => (
+  return (
+    <div
+      style={{
+        minHeight: "100vh",
+        background: "#f8fafc",
+        color: "#0f172a",
+        fontFamily:
+          'Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+      }}
+    >
+      <div style={{ maxWidth: 1600, margin: "0 auto", padding: 28 }}>
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          style={{ marginBottom: 28 }}
+        >
           <div
-            key={s.label}
             style={{
-              padding: 16,
-              border: "1px solid #ddd",
-              borderRadius: 10,
-              minWidth: 120,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              color: "#64748b",
+              fontSize: 14,
             }}
           >
-            <div style={{ fontSize: 12 }}>{s.label}</div>
-            <div style={{ fontSize: 22, fontWeight: "bold" }}>
-              {s.value}
-            </div>
+            <ShieldCheck size={16} />
+            EIN Operations Demo · Live Agent Review Console
           </div>
-        ))}
-      </div>
+          <h1 style={{ fontSize: 40, margin: "12px 0 8px", lineHeight: 1.1 }}>
+            EIN Review + Exception Handling Workspace
+          </h1>
+          <p style={{ maxWidth: 980, color: "#475569", fontSize: 16 }}>
+            Demo UI for bot coordination, live review, exception routing, and
+            completion tracking before handing the project to developers.
+          </p>
+        </motion.div>
 
-      <div style={{ display: "flex", marginTop: 30, gap: 20 }}>
-        {/* Left Panel */}
-        <div style={{ width: 300 }}>
-          <input
-            placeholder="Search..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            style={{
-              width: "100%",
-              padding: 10,
-              marginBottom: 10,
-              borderRadius: 8,
-              border: "1px solid #ccc",
-            }}
-          />
-
-          {filtered.map((c) => (
-            <div
-              key={c.id}
-              onClick={() => setSelected(c)}
-              style={{
-                border: "1px solid #ddd",
-                padding: 10,
-                marginBottom: 10,
-                borderRadius: 10,
-                cursor: "pointer",
-              }}
-            >
-              <div style={{ fontWeight: "bold" }}>{c.company}</div>
-              <div style={{ fontSize: 12 }}>{c.id}</div>
-              <div style={badge(c.status)}>{c.status}</div>
-            </div>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(6, minmax(0, 1fr))",
+            gap: 16,
+            marginBottom: 28,
+          }}
+        >
+          {queueStats.map((stat) => (
+            <StatCard key={stat.label} stat={stat} />
           ))}
         </div>
 
-        {/* Right Panel */}
-        <div style={{ flex: 1 }}>
-          <h2>{selected.company}</h2>
+        <div
+          style={{
+            display: "grid",
+            gridTemplateColumns: "390px 1fr",
+            gap: 24,
+          }}
+        >
+          <div style={{ ...cardStyle(), padding: 20 }}>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                marginBottom: 14,
+              }}
+            >
+              <h2 style={{ margin: 0, fontSize: 22 }}>Agent Queue</h2>
+              <div style={badgeStyle("#fff", "#334155")}>
+                {filtered.length} visible
+              </div>
+            </div>
 
-          <div style={{ marginTop: 10 }}>
-            <strong>Responsible Party:</strong>{" "}
-            {selected.responsibleParty}
+            <div style={{ display: "flex", gap: 10, marginBottom: 16 }}>
+              <div style={{ position: "relative", flex: 1 }}>
+                <Search
+                  size={16}
+                  color="#94a3b8"
+                  style={{
+                    position: "absolute",
+                    left: 12,
+                    top: "50%",
+                    transform: "translateY(-50%)",
+                  }}
+                />
+                <input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder="Search case, party, state..."
+                  style={{
+                    width: "100%",
+                    height: 42,
+                    borderRadius: 14,
+                    border: "1px solid #cbd5e1",
+                    padding: "0 14px 0 36px",
+                    outline: "none",
+                    fontSize: 14,
+                  }}
+                />
+              </div>
+              <button style={{ ...buttonStyle(false), width: 42, padding: 0 }}>
+                <Filter size={16} />
+              </button>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gap: 12,
+                maxHeight: 980,
+                overflow: "auto",
+                paddingRight: 4,
+              }}
+            >
+              {filtered.map((item) => {
+                const itemMeta = statusMeta(item.status);
+                const isSelected = selected.id === item.id;
+                return (
+                  <button
+                    key={item.id}
+                    onClick={() => setSelectedId(item.id)}
+                    style={{
+                      textAlign: "left",
+                      width: "100%",
+                      borderRadius: 18,
+                      border: isSelected
+                        ? "1px solid #0f172a"
+                        : "1px solid #e2e8f0",
+                      background: "#fff",
+                      padding: 16,
+                      cursor: "pointer",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        gap: 12,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: 14 }}>
+                          {item.company}
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: 12,
+                            color: "#64748b",
+                          }}
+                        >
+                          {item.id} · {item.state} · {item.county}
+                        </div>
+                      </div>
+                      <ChevronRight size={16} color="#94a3b8" />
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        flexWrap: "wrap",
+                        marginTop: 12,
+                      }}
+                    >
+                      <div style={badgeStyle(itemMeta.bg, itemMeta.color)}>
+                        {itemMeta.label}
+                      </div>
+                      <div style={badgeStyle("#fff", "#334155")}>
+                        {item.priority === "high"
+                          ? "High Priority"
+                          : "Normal"}
+                      </div>
+                      <div style={badgeStyle("#fff", "#334155")}>
+                        {item.stage}
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "grid",
+                        gridTemplateColumns: "1fr 1fr",
+                        gap: 10,
+                        marginTop: 14,
+                      }}
+                    >
+                      <div>
+                        <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                          Responsible Party
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: 13,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {item.responsibleParty}
+                        </div>
+                      </div>
+                      <div>
+                        <div style={{ fontSize: 12, color: "#94a3b8" }}>
+                          Bot Worker
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 4,
+                            fontSize: 13,
+                            fontWeight: 700,
+                          }}
+                        >
+                          {item.botWorker}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        marginTop: 14,
+                        fontSize: 12,
+                      }}
+                    >
+                      <div style={{ color: "#64748b" }}>Age: {item.age}</div>
+                      <div style={{ fontWeight: 700 }}>
+                        {item.issueCount} issues
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
           </div>
 
-          <div style={{ marginTop: 10 }}>
-            <strong>State:</strong> {selected.state}
-          </div>
+          <div style={{ display: "grid", gap: 24 }}>
+            <div style={{ ...cardStyle(), padding: 24 }}>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 20,
+                  alignItems: "flex-start",
+                }}
+              >
+                <div>
+                  <div
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 10,
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <h2 style={{ margin: 0, fontSize: 30 }}>
+                      {selected.company}
+                    </h2>
+                    <div style={badgeStyle(meta.bg, meta.color)}>
+                      {meta.label}
+                    </div>
+                    <div style={badgeStyle("#fff", "#334155")}>
+                      {selected.id}
+                    </div>
+                  </div>
+                  <div
+                    style={{
+                      display: "flex",
+                      gap: 24,
+                      flexWrap: "wrap",
+                      marginTop: 14,
+                      fontSize: 14,
+                      color: "#475569",
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Bot size={16} /> {selected.botWorker}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Users size={16} /> {selected.responsibleParty}
+                    </div>
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 8,
+                        alignItems: "center",
+                      }}
+                    >
+                      <Timer size={16} /> Age {selected.age}
+                    </div>
+                  </div>
+                </div>
 
-          <div style={{ marginTop: 10 }}>
-            <strong>Issues:</strong> {selected.issues}
-          </div>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(2, auto)",
+                    gap: 10,
+                  }}
+                >
+                  <button style={buttonStyle(true)}>Approve Submit</button>
+                  <button style={buttonStyle(false)}>
+                    Send to Exception
+                  </button>
+                  <button style={buttonStyle(false)}>Retry Bot</button>
+                  <button style={buttonStyle(false)}>Hold Case</button>
+                </div>
+              </div>
 
-          <div style={{ marginTop: 20, display: "flex", gap: 10 }}>
-            <button style={{ padding: 10 }}>Approve</button>
-            <button style={{ padding: 10 }}>Send to Exception</button>
-            <button style={{ padding: 10 }}>Retry</button>
-          </div>
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "repeat(4, 1fr)",
+                  gap: 14,
+                  marginTop: 22,
+                }}
+              >
+                <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
+                  <SectionLabel>Confidence</SectionLabel>
+                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>
+                    {selected.confidence}%
+                  </div>
+                </div>
+                <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
+                  <SectionLabel>Current Stage</SectionLabel>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>
+                    {selected.stage}
+                  </div>
+                  <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
+                    Guard rails passed through current step.
+                  </div>
+                </div>
+                <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
+                  <SectionLabel>Issues</SectionLabel>
+                  <div style={{ marginTop: 8, fontSize: 28, fontWeight: 800 }}>
+                    {selected.issueCount}
+                  </div>
+                  <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
+                    Exceptions or mismatches requiring attention.
+                  </div>
+                </div>
+                <div style={{ background: "#f1f5f9", borderRadius: 18, padding: 16 }}>
+                  <SectionLabel>Recommended Action</SectionLabel>
+                  <div style={{ marginTop: 8, fontSize: 18, fontWeight: 800 }}>
+                    {selected.agentAction}
+                  </div>
+                  <div style={{ marginTop: 8, color: "#64748b", fontSize: 14 }}>
+                    Based on current validation and bot status.
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div style={{ marginTop: 30 }}>
-            <h3>Review Panel</h3>
-            <div style={{ border: "1px dashed #ccc", padding: 20 }}>
-              IRS Review snapshot will display here
+            <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+              <TabButton
+                label="review"
+                value="review"
+                tab={tab}
+                setTab={setTab}
+              />
+              <TabButton
+                label="exceptions"
+                value="exceptions"
+                tab={tab}
+                setTab={setTab}
+              />
+              <TabButton
+                label="timeline"
+                value="timeline"
+                tab={tab}
+                setTab={setTab}
+              />
+              <TabButton
+                label="artifacts"
+                value="artifacts"
+                tab={tab}
+                setTab={setTab}
+              />
+            </div>
+
+            {tab === "review" && (
+              <div
+                style={{
+                  display: "grid",
+                  gridTemplateColumns: "1fr 360px",
+                  gap: 24,
+                }}
+              >
+                <div style={{ ...cardStyle(), padding: 24 }}>
+                  <h3 style={{ marginTop: 0, fontSize: 24 }}>
+                    Live Agent Review Screen
+                  </h3>
+
+                  <div
+                    style={{
+                      display: "grid",
+                      gridTemplateColumns: "1fr 1fr",
+                      gap: 14,
+                      marginTop: 18,
+                    }}
+                  >
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Entity Details</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 16,
+                          display: "grid",
+                          gap: 12,
+                          fontSize: 14,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Legal name</span>
+                          <strong>{selected.legalName}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>State</span>
+                          <strong>{selected.state}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>County</span>
+                          <strong>{selected.county}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Reason</span>
+                          <strong>{selected.reviewSummary.reason}</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Responsible Party</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 16,
+                          display: "grid",
+                          gap: 12,
+                          fontSize: 14,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Name</span>
+                          <strong>{selected.responsibleParty}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Role</span>
+                          <strong>Owner / Managing Member</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Identity status</span>
+                          <strong>Validated pre-run</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>One-per-day check</span>
+                          <strong>Passed</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Address + Contact</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 16,
+                          display: "grid",
+                          gap: 12,
+                          fontSize: 14,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Physical address</span>
+                          <strong style={{ textAlign: "right" }}>
+                            {selected.reviewSummary.address}
+                          </strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Phone</span>
+                          <strong>{selected.reviewSummary.phone}</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Mailing</span>
+                          <strong>Same as physical</strong>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Business Activity</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 16,
+                          display: "grid",
+                          gap: 12,
+                          fontSize: 14,
+                        }}
+                      >
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Category</span>
+                          <strong style={{ textAlign: "right" }}>
+                            {selected.reviewSummary.businessActivity}
+                          </strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>Employees</span>
+                          <strong>No</strong>
+                        </div>
+                        <div style={{ display: "flex", justifyContent: "space-between", gap: 10 }}>
+                          <span style={{ color: "#64748b" }}>
+                            Excise / ATF / Gambling
+                          </span>
+                          <strong>No / No / No</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div
+                    style={{
+                      marginTop: 18,
+                      border: "1px dashed #cbd5e1",
+                      borderRadius: 22,
+                      background: "#f8fafc",
+                      padding: 18,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        gap: 12,
+                      }}
+                    >
+                      <div>
+                        <SectionLabel>IRS Review Page Preview</SectionLabel>
+                        <div
+                          style={{
+                            marginTop: 8,
+                            color: "#475569",
+                            fontSize: 14,
+                          }}
+                        >
+                          This is where the live agent confirms the bot-captured
+                          review page without working directly inside the IRS
+                          site.
+                        </div>
+                      </div>
+                      <button style={buttonStyle(false)}>
+                        <Eye size={16} style={{ marginRight: 8 }} />
+                        Open Full Screenshot
+                      </button>
+                    </div>
+
+                    <div
+                      style={{
+                        marginTop: 18,
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 20,
+                        background: "#fff",
+                        padding: 20,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          marginBottom: 16,
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontSize: 20, fontWeight: 800 }}>
+                            Review & Submit Snapshot
+                          </div>
+                          <div
+                            style={{
+                              fontSize: 14,
+                              color: "#64748b",
+                              marginTop: 4,
+                            }}
+                          >
+                            Captured by bot at 09:16:49 · hash verified
+                          </div>
+                        </div>
+                        <div style={badgeStyle("#fff", "#334155")}>Read Only</div>
+                      </div>
+
+                      <div style={{ display: "grid", gap: 14, fontSize: 14 }}>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            borderBottom: "1px solid #e2e8f0",
+                            paddingBottom: 10,
+                          }}
+                        >
+                          <span style={{ color: "#64748b" }}>
+                            Organization type
+                          </span>
+                          <strong>
+                            Single Member Limited Liability Company (LLC)
+                          </strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            borderBottom: "1px solid #e2e8f0",
+                            paddingBottom: 10,
+                          }}
+                        >
+                          <span style={{ color: "#64748b" }}>Legal name</span>
+                          <strong>{selected.legalName}</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            borderBottom: "1px solid #e2e8f0",
+                            paddingBottom: 10,
+                          }}
+                        >
+                          <span style={{ color: "#64748b" }}>
+                            Responsible party
+                          </span>
+                          <strong>{selected.responsibleParty}</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                            borderBottom: "1px solid #e2e8f0",
+                            paddingBottom: 10,
+                          }}
+                        >
+                          <span style={{ color: "#64748b" }}>
+                            Business activity
+                          </span>
+                          <strong>{selected.reviewSummary.businessActivity}</strong>
+                        </div>
+                        <div
+                          style={{
+                            display: "flex",
+                            justifyContent: "space-between",
+                          }}
+                        >
+                          <span style={{ color: "#64748b" }}>
+                            Reason for applying
+                          </span>
+                          <strong>{selected.reviewSummary.reason}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div style={{ ...cardStyle(), padding: 24 }}>
+                  <h3 style={{ marginTop: 0, fontSize: 24 }}>Approval Panel</h3>
+
+                  <div
+                    style={{
+                      border: "1px solid #bbf7d0",
+                      background: "#f0fdf4",
+                      borderRadius: 18,
+                      padding: 16,
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: "flex",
+                        gap: 10,
+                        alignItems: "flex-start",
+                      }}
+                    >
+                      <CheckCircle2
+                        size={18}
+                        color="#16a34a"
+                        style={{ marginTop: 2 }}
+                      />
+                      <div>
+                        <div style={{ fontWeight: 800, color: "#166534" }}>
+                          Guard rails currently passed
+                        </div>
+                        <div
+                          style={{
+                            marginTop: 6,
+                            fontSize: 14,
+                            color: "#166534",
+                          }}
+                        >
+                          No source-to-review mismatches detected for this case.
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{ ...softPanelStyle(), marginTop: 16 }}>
+                    <SectionLabel>Agent Checklist</SectionLabel>
+                    <div
+                      style={{
+                        display: "grid",
+                        gap: 12,
+                        marginTop: 14,
+                        fontSize: 14,
+                      }}
+                    >
+                      {[
+                        "Legal name matches source-of-truth record",
+                        "Responsible party matches validated intake",
+                        "Address and state fields look correct",
+                        "Business activity is specific enough",
+                        "Reason for applying is correct",
+                      ].map((item) => (
+                        <div
+                          key={item}
+                          style={{ display: "flex", gap: 10, alignItems: "center" }}
+                        >
+                          <CheckCircle2 size={16} color="#16a34a" />
+                          <span>{item}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div style={{ ...softPanelStyle(), marginTop: 16 }}>
+                    <SectionLabel>Decision Actions</SectionLabel>
+                    <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+                      <button style={buttonStyle(true)}>
+                        Approve and Resume Bot Submission
+                      </button>
+                      <button style={buttonStyle(false)}>
+                        Reject to Exception Queue
+                      </button>
+                      <button style={buttonStyle(false)}>
+                        Request Source Data Edit
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "exceptions" && (
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>
+                  Exception Handling Workspace
+                </h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 320px",
+                    gap: 24,
+                  }}
+                >
+                  <div style={{ display: "grid", gap: 14 }}>
+                    {(selected.mismatches.length
+                      ? selected.mismatches
+                      : ["No active exceptions for this case."]
+                    ).map((issue, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          border: `1px solid ${
+                            selected.mismatches.length ? "#fecaca" : "#bbf7d0"
+                          }`,
+                          background: selected.mismatches.length
+                            ? "#fef2f2"
+                            : "#f0fdf4",
+                          borderRadius: 18,
+                          padding: 16,
+                        }}
+                      >
+                        <div
+                          style={{
+                            display: "flex",
+                            gap: 10,
+                            alignItems: "flex-start",
+                          }}
+                        >
+                          {selected.mismatches.length ? (
+                            <AlertTriangle
+                              size={18}
+                              color="#dc2626"
+                              style={{ marginTop: 2 }}
+                            />
+                          ) : (
+                            <CheckCircle2
+                              size={18}
+                              color="#16a34a"
+                              style={{ marginTop: 2 }}
+                            />
+                          )}
+                          <div>
+                            <div style={{ fontWeight: 800 }}>
+                              {selected.mismatches.length
+                                ? `Issue ${index + 1}`
+                                : "Clean case"}
+                            </div>
+                            <div
+                              style={{
+                                marginTop: 6,
+                                fontSize: 14,
+                                color: "#334155",
+                              }}
+                            >
+                              {issue}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "grid", gap: 14 }}>
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Suggested Resolution</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 10,
+                          fontSize: 14,
+                          color: "#334155",
+                        }}
+                      >
+                        Route county mismatch to source-data editor and require
+                        agent confirmation before requeue.
+                      </div>
+                    </div>
+
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Exception Actions</SectionLabel>
+                      <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+                        <button style={buttonStyle(true)}>
+                          Assign to Specialist
+                        </button>
+                        <button style={buttonStyle(false)}>
+                          Edit Source Data
+                        </button>
+                        <button style={buttonStyle(false)}>Requeue Case</button>
+                        <button style={buttonStyle(false)}>Cancel Filing</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "timeline" && (
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>
+                  Bot Timeline + Session State
+                </h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "1fr 280px",
+                    gap: 24,
+                  }}
+                >
+                  <div style={{ display: "grid", gap: 12 }}>
+                    {timeline.map((item) => (
+                      <div
+                        key={`${item.time}-${item.label}`}
+                        style={{
+                          border: "1px solid #e2e8f0",
+                          borderRadius: 18,
+                          padding: 16,
+                          display: "flex",
+                          gap: 16,
+                        }}
+                      >
+                        <div
+                          style={{
+                            minWidth: 72,
+                            fontSize: 14,
+                            fontWeight: 700,
+                            color: "#64748b",
+                          }}
+                        >
+                          {item.time}
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{item.label}</div>
+                          <div
+                            style={{
+                              marginTop: 4,
+                              fontSize: 14,
+                              color: "#64748b",
+                            }}
+                          >
+                            {selected.botWorker} · IRS EIN application session
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ display: "grid", gap: 14 }}>
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Session Health</SectionLabel>
+                      <div
+                        style={{
+                          marginTop: 10,
+                          fontSize: 28,
+                          fontWeight: 800,
+                        }}
+                      >
+                        Healthy
+                      </div>
+                      <div
+                        style={{
+                          marginTop: 8,
+                          fontSize: 14,
+                          color: "#64748b",
+                        }}
+                      >
+                        9m 12s remaining before inactivity timeout.
+                      </div>
+                    </div>
+
+                    <div style={softPanelStyle()}>
+                      <SectionLabel>Worker Controls</SectionLabel>
+                      <div style={{ display: "grid", gap: 10, marginTop: 14 }}>
+                        <button style={buttonStyle(false)}>Pause Session</button>
+                        <button style={buttonStyle(false)}>
+                          Refresh Heartbeat
+                        </button>
+                        <button style={buttonStyle(false)}>
+                          Move to Safe Hold
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {tab === "artifacts" && (
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <h3 style={{ marginTop: 0, fontSize: 24 }}>
+                  Artifacts + Audit Trail
+                </h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "repeat(3, 1fr)",
+                    gap: 14,
+                  }}
+                >
+                  {artifacts.map((item) => (
+                    <div
+                      key={item}
+                      style={{
+                        border: "1px solid #e2e8f0",
+                        borderRadius: 18,
+                        padding: 16,
+                      }}
+                    >
+                      <div
+                        style={{
+                          display: "flex",
+                          justifyContent: "space-between",
+                          gap: 10,
+                        }}
+                      >
+                        <div>
+                          <div style={{ fontWeight: 700 }}>{item}</div>
+                          <div
+                            style={{
+                              marginTop: 6,
+                              fontSize: 14,
+                              color: "#64748b",
+                            }}
+                          >
+                            Stored for audit and replay review.
+                          </div>
+                        </div>
+                        <button
+                          style={{ ...buttonStyle(false), width: 42, padding: 0 }}
+                        >
+                          <Download size={16} />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1fr 1fr",
+                gap: 24,
+              }}
+            >
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <h3 style={{ marginTop: 0, fontSize: 22 }}>Operational Notes</h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 14,
+                    fontSize: 14,
+                    color: "#475569",
+                  }}
+                >
+                  <div>
+                    This mock is designed around a single-screen agent workflow
+                    rather than having reviewers work directly in the IRS
+                    browser.
+                  </div>
+                  <div>
+                    Clean cases should take under one minute of human review.
+                    Exception cases are routed into a specialist workflow with
+                    explicit actions.
+                  </div>
+                  <div>
+                    Bot control actions are surfaced in the same console so
+                    operations teams can approve, retry, pause, and audit without
+                    switching tools.
+                  </div>
+                </div>
+              </div>
+
+              <div style={{ ...cardStyle(), padding: 24 }}>
+                <h3 style={{ marginTop: 0, fontSize: 22 }}>
+                  Next UI Decisions to Finalize
+                </h3>
+                <div
+                  style={{
+                    display: "grid",
+                    gap: 10,
+                    fontSize: 14,
+                    color: "#475569",
+                  }}
+                >
+                  <div>
+                    1. Whether review and exception handling should live on one
+                    page or separate pages.
+                  </div>
+                  <div>
+                    2. Whether agents should see source values side-by-side with
+                    bot-entered values.
+                  </div>
+                  <div>
+                    3. Whether approvals should require a reason code or only
+                    exceptions should.
+                  </div>
+                  <div>
+                    4. Which actions are available to standard reviewers vs
+                    specialist leads.
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
