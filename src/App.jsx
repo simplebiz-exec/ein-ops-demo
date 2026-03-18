@@ -981,34 +981,58 @@ function ExceptionScreen({ item, onBack, onSaveAndSubmit }) {
         </div>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24 }}>
-        <div style={{ ...cardStyle(), padding: 24 }}>
-          <h3 style={{ marginTop: 0, fontSize: 22 }}>IRS / Current Values</h3>
-          <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
-            {Object.entries(item.irsValues).map(([key, value]) => {
-              const isMismatch = mismatchFields.includes(key);
-              return (
-                <div
-                  key={key}
-                  style={{
-                    padding: 14,
-                    borderRadius: 14,
-                    border: `1px solid ${isMismatch ? "#fecaca" : "#e2e8f0"}`,
-                    background: isMismatch ? "#fef2f2" : "#fff",
-                  }}
-                >
-                  <div style={{ fontSize: 12, color: "#64748b", fontWeight: 700 }}>{fieldLabel(key)}</div>
-                  <div style={{ marginTop: 6, fontSize: 14, fontWeight: 700 }}>{value}</div>
-                  {isMismatch && (
-                    <div style={{ marginTop: 8 }}>
-                      <span style={badgeStyle("#fee2e2", "#b91c1c")}>Highlighted mismatch</span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
+      <div style={{ ...cardStyle(), padding: 24 }}>
+  <h3 style={{ marginTop: 0, fontSize: 22 }}>IRS / Current Values</h3>
+  <div style={{ display: "grid", gap: 14, marginTop: 16 }}>
+    {Object.entries(item.irsValues).map(([key, value]) => {
+      const isMismatch = mismatchFields.includes(key);
+      return (
+        <div
+          key={key}
+          style={{
+            padding: 14,
+            borderRadius: 14,
+            border: `1px solid ${isMismatch ? "#fecaca" : "#e2e8f0"}`,
+            background: isMismatch ? "#fef2f2" : "#fff",
+          }}
+        >
+          <div
+            style={{
+              marginBottom: 8,
+              fontSize: 12,
+              color: "#64748b",
+              fontWeight: 700,
+              textAlign: "center",
+            }}
+          >
+            {fieldLabel(key)}
           </div>
+
+          <div
+            style={{
+              ...inputStyle(),
+              display: "flex",
+              alignItems: "center",
+              color: "#0f172a",
+              fontWeight: 500,
+              background: "#fff",
+            }}
+          >
+            {value}
+          </div>
+
+          {isMismatch && (
+            <div style={{ marginTop: 12, textAlign: "center" }}>
+              <span style={badgeStyle("#fee2e2", "#b91c1c")}>
+                Highlighted mismatch
+              </span>
+            </div>
+          )}
         </div>
+      );
+    })}
+  </div>
+</div>
 
         <div style={{ ...cardStyle(), padding: 24 }}>
           <h3 style={{ marginTop: 0, fontSize: 22 }}>Corrected Values</h3>
